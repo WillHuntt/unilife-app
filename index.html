@@ -1,0 +1,35 @@
+<!-- Final HTML with mobile-first design, color-coded categories -->
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reminder App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📅 Personal Reminder App</h1>
+      <button id="theme-toggle">Toggle Theme</button>
+    </header>
+
+    <form id="task-form">
+      <input type="text" id="task-input" placeholder="Enter your task..." required />
+      <select id="category">
+        <option value="university">University</option>
+        <option value="fitness">Fitness</option>
+        <option value="other">Other</option>
+      </select>
+      <input type="date" id="due-date" required />
+      <input type="email" id="email-input" placeholder="Email for reminder (optional)" />
+      <button type="submit">Add Task</button>
+    </form>
+
+    <ul id="task-list"></ul>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
