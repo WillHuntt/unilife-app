@@ -18,6 +18,7 @@ body {
   color: var(--text);
   margin: 0;
   padding: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -33,10 +34,15 @@ header {
   margin-bottom: 1rem;
 }
 
+#theme-toggle {
+  cursor: pointer;
+}
+
 #calendar {
   background: var(--card);
   border-radius: 8px;
   padding: 0.5rem;
+  transition: background-color 0.3s ease;
 }
 
 /* Modal styles */
@@ -51,6 +57,17 @@ header {
   transform: translate(-50%, -50%);
   z-index: 1001;
   box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  transition: background-color 0.3s ease;
+}
+
+#modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 1000;
 }
 
 .hidden {
@@ -114,4 +131,10 @@ header {
 .fc-event-other {
   background-color: var(--other) !important;
   border-color: var(--other) !important;
+}
+
+/* Focus outline for accessibility */
+button:focus, input:focus, select:focus {
+  outline: 2px solid var(--university);
+  outline-offset: 2px;
 }
