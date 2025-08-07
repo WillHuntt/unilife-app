@@ -1,11 +1,13 @@
-<!-- Final HTML with mobile-first design, color-coded categories -->
-
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Reminder App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reminder App with Calendar</title>
+  
+  <!-- FullCalendar CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" />
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -15,20 +17,53 @@
       <button id="theme-toggle">Toggle Theme</button>
     </header>
 
-    <form id="task-form">
-      <input type="text" id="task-input" placeholder="Enter your task..." required />
-      <select id="category">
-        <option value="university">University</option>
-        <option value="fitness">Fitness</option>
-        <option value="other">Other</option>
-      </select>
-      <input type="date" id="due-date" required />
-      <input type="email" id="email-input" placeholder="Email for reminder (optional)" />
-      <button type="submit">Add Task</button>
-    </form>
+    <div id="calendar"></div>
 
-    <ul id="task-list"></ul>
+    <!-- Modal for adding/editing tasks -->
+    <div id="task-modal" class="modal hidden">
+      <form id="task-form">
+        <h2 id="modal-title">Add Task</h2>
+        <label>
+          Task:
+          <input type="text" id="task-input" required />
+        </label>
+        <label>
+          Category:
+          <select id="category">
+            <option value="university">University</option>
+            <option value="fitness">Fitness</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label>
+          Due Date:
+          <input type="date" id="due-date" required />
+        </label>
+        <label>
+          Email for reminder (optional):
+          <input type="email" id="email-input" />
+        </label>
+        <input type="hidden" id="task-id" />
+        <div class="modal-buttons">
+          <button type="submit">Save</button>
+          <button type="button" id="delete-task-btn" class="hidden">Delete</button>
+          <button type="button" id="close-modal-btn">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="modal-overlay" class="hidden"></div>
   </div>
+
+  <!-- Firebase -->
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  
+  <!-- EmailJS -->
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+
+  <!-- FullCalendar JS -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
 
   <script type="module" src="app.js"></script>
 </body>

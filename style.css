@@ -1,9 +1,10 @@
-/* Final CSS with clean, modern layout, responsive design, dark/light theme */
-
 :root {
   --bg: #ffffff;
   --text: #111111;
   --card: #f3f3f3;
+  --university: #007bff;
+  --fitness: #28a745;
+  --other: #ff9800;
 }
 [data-theme="dark"] {
   --bg: #121212;
@@ -20,7 +21,7 @@ body {
 }
 
 .container {
-  max-width: 500px;
+  max-width: 700px;
   margin: 2rem auto;
   padding: 1rem;
 }
@@ -29,49 +30,88 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 1rem;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin: 1rem 0;
-}
-
-input, select, button {
-  padding: 0.6rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-}
-
-button {
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
-}
-
-#task-list {
-  list-style: none;
-  padding: 0;
-}
-
-.task-item {
+#calendar {
   background: var(--card);
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  background: var(--card);
+  border-radius: 8px;
   padding: 1rem;
+  width: 300px;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.hidden {
+  display: none;
+}
+
+.modal label {
+  display: block;
+  margin: 0.5rem 0 0.25rem 0;
+}
+
+.modal input, .modal select {
+  width: 100%;
+  padding: 0.4rem;
   margin-bottom: 0.5rem;
-  border-left: 8px solid;
   border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.modal-buttons {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  gap: 0.5rem;
 }
 
-.task-item.completed {
-  text-decoration: line-through;
-  opacity: 0.6;
+.modal-buttons button {
+  flex: 1;
+  padding: 0.5rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
 }
 
-.task-item.university { border-color: #007bff; }
-.task-item.fitness { border-color: #28a745; }
-.task-item.other { border-color: #ff9800; }
+.modal-buttons button[type="submit"] {
+  background-color: var(--university);
+  color: white;
+}
+
+#delete-task-btn {
+  background-color: #d9534f;
+  color: white;
+}
+
+#close-modal-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* FullCalendar event colors by category */
+.fc-event-university {
+  background-color: var(--university) !important;
+  border-color: var(--university) !important;
+}
+
+.fc-event-fitness {
+  background-color: var(--fitness) !important;
+  border-color: var(--fitness) !important;
+}
+
+.fc-event-other {
+  background-color: var(--other) !important;
+  border-color: var(--other) !important;
+}
