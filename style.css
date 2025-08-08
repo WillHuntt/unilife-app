@@ -1,4 +1,4 @@
-/* Root variables for light and dark themes */
+/* Root variables for light theme (default) */
 :root {
   --bg: #f8f9fa; /* Light background */
   --text: #212529; /* Dark text */
@@ -15,8 +15,23 @@
   --google-blue-dark: #3367d6; /* Darker Google blue for hover */
 }
 
-/* Dark theme variables */
-[data-theme="dark"] {
+/* Dark theme variables applied automatically if system prefers dark */
+@media (prefers-color-scheme: dark) {
+  :root { /* Apply to root if system prefers dark and no manual override */
+    --bg: #1a1a1a;
+    --text: #e0e0e0;
+    --card: #2c2c2c;
+    --border: #444444;
+    --primary: #66b3ff; /* Lighter blue for dark theme */
+    --secondary: #66cc80; /* Lighter green for dark theme */
+    --accent: #ffda66; /* Lighter yellow for dark theme */
+    --danger: #ff6b6b;
+    --info: #a0a0a0;
+  }
+}
+
+/* Dark theme variables applied when data-theme="dark" is explicitly set (manual override) */
+body[data-theme="dark"] {
   --bg: #1a1a1a;
   --text: #e0e0e0;
   --card: #2c2c2c;
@@ -27,6 +42,7 @@
   --danger: #ff6b6b;
   --info: #a0a0a0;
 }
+
 
 /* Base styles */
 body {

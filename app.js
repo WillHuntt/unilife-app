@@ -94,6 +94,7 @@ const signInBtn = document.getElementById("auth-signin-btn");
 const googleSignInBtn = document.getElementById("google-signin-btn"); // New Google button
 const signOutBtn = document.getElementById("auth-signout-btn");
 const authStatusDiv = document.getElementById("auth-status");
+const toggleThemeBtn = document.getElementById("toggle-theme"); // Reference to the theme toggle button
 
 // Function to toggle modal visibility
 function toggleModal(show) {
@@ -201,11 +202,50 @@ deleteBtn.onclick = async () => {
 // Modal cancel button click handler
 closeModalBtn.onclick = () => toggleModal(false);
 
+// --- Theme Management ---
+const THEME_STORAGE_KEY = 'user-theme'; // Key for localStorage
+
+// Function to set the theme and save to localStorage
+function setTheme(theme) {
+  document.body.dataset.theme = theme;
+  localStorage.setItem(THEME_STORAGE_KEY, theme);
+  console.log("Theme set to:", theme);
+}
+
+// Function to get the preferred system theme
+function getSystemTheme() {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+// Initialize theme on page load
+function initializeTheme() {
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  if (savedTheme) {
+    // Use saved theme if available
+    setTheme(savedTheme);
+  } else {
+    // Otherwise, use system preference
+    setTheme(getSystemTheme());
+  }
+}
+
+// Listen for system theme changes
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+  // Only update if no explicit theme is saved by the user
+  if (!localStorage.getItem(THEME_STORAGE_KEY)) {
+    setTheme(event.matches ? 'dark' : 'light');
+  }
+});
+
 // Theme toggle button click handler
-document.getElementById("toggle-theme").onclick = () => {
-  document.body.dataset.theme = document.body.dataset.theme === "dark" ? "light" : "dark";
-  console.log("Theme toggled to:", document.body.dataset.theme);
-};
+if (toggleThemeBtn) {
+  toggleThemeBtn.onclick = () => {
+    const currentTheme = document.body.dataset.theme;
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+  };
+}
+
 
 // --- Authentication Functions ---
 
@@ -277,6 +317,8 @@ if (signOutBtn) { // Check if element exists
       authStatusDiv.textContent = "Not signed in.";
       emailInput.value = ""; // Clear email field
       passwordInput.value = ""; // Clear password field
+      localStorage.removeItem(THEME_STORAGE_KEY); // Remove user's manual theme preference
+      setTheme(getSystemTheme()); // Revert to system theme on sign out
     } catch (error) {
       console.error("Error signing out:", error.message);
       authStatusDiv.textContent = `Sign Out Error: ${error.message}`;
@@ -284,9 +326,13 @@ if (signOutBtn) { // Check if element exists
   };
 }
 
-// Initialize FullCalendar when the DOM is loaded
+// Initialize FullCalendar and Theme when the DOM is loaded
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("DOM Content Loaded. Initializing calendar...");
+  console.log("DOM Content Loaded. Initializing calendar and theme...");
+
+  // Initialize Theme first
+  initializeTheme();
+
   const calendarEl = document.getElementById("calendar");
 
   // Initialize FullCalendar instance
