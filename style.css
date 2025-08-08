@@ -487,7 +487,8 @@ header h1 {
   box-shadow: 0 2px 8px var(--shadow-light);
 }
 
-.empty-state.hidden {
+/* The crucial hidden class */
+.hidden {
   display: none !important; /* Added !important to ensure hiding */
 }
 

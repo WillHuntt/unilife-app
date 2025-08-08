@@ -123,8 +123,9 @@ let onConfirmCallback = null;
 function toggleTaskModal(show) {
   taskModal.classList.toggle("hidden", !show);
   if (!show) {
+    // ONLY reset form and selectedEvent when closing the modal
     taskForm.reset();
-    selectedEvent = null; // ONLY reset selectedEvent when closing the modal
+    selectedEvent = null;
     colorPicker.value = "#3498db";
     iconPicker.value = "";
   }
@@ -370,7 +371,7 @@ function getSystemTheme() {
 
 function updateThemeToggleButton(theme) {
   if (toggleThemeBtn) {
-    toggleThemeBtn.textContent = theme === 'dark' ? '☀️' : '�';
+    toggleThemeBtn.textContent = theme === 'dark' ? '☀️' : '🌗';
     toggleThemeBtn.setAttribute('data-tooltip', `Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Theme`);
   }
 }
@@ -575,11 +576,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("onAuthStateChanged: Attempting to show user info and hide auth forms.");
 
       // Show user info and hide auth forms
-      if (userInfoDisplay) userInfoDisplay.classList.remove("hidden");
-      if (authFormsContainer) authFormsContainer.classList.add("hidden");
-      console.log("onAuthStateChanged: userInfoDisplay hidden status:", userInfoDisplay?.classList.contains("hidden"));
-      console.log("onAuthStateChanged: authFormsContainer hidden status:", authFormsContainer?.classList.contains("hidden"));
-
+      if (userInfoDisplay) {
+        userInfoDisplay.classList.remove("hidden");
+        console.log("onAuthStateChanged: userInfoDisplay classList after remove:", userInfoDisplay.classList.value);
+      }
+      if (authFormsContainer) {
+        authFormsContainer.classList.add("hidden");
+        console.log("onAuthStateChanged: authFormsContainer classList after add:", authFormsContainer.classList.value);
+      }
 
       displayUserEmail.textContent = user.email || user.displayName || `User ID: ${user.uid}`;
 
@@ -595,10 +599,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("onAuthStateChanged: Attempting to hide user info and show auth forms.");
 
       // Hide user info and show auth forms
-      if (userInfoDisplay) userInfoDisplay.classList.add("hidden");
-      if (authFormsContainer) authFormsContainer.classList.remove("hidden");
-      console.log("onAuthStateChanged: userInfoDisplay hidden status:", userInfoDisplay?.classList.contains("hidden"));
-      console.log("onAuthStateChanged: authFormsContainer hidden status:", authFormsContainer?.classList.contains("hidden"));
+      if (userInfoDisplay) {
+        userInfoDisplay.classList.add("hidden");
+        console.log("onAuthStateChanged: userInfoDisplay classList after add:", userInfoDisplay.classList.value);
+      }
+      if (authFormsContainer) {
+        authFormsContainer.classList.remove("hidden");
+        console.log("onAuthStateChanged: authFormsContainer classList after remove:", authFormsContainer.classList.value);
+      }
 
       try {
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
