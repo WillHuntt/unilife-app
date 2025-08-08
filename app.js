@@ -30,6 +30,7 @@ const auth = getAuth(app);
 let calendar;
 let selectedEvent = null;
 let userId = null; // To store the current user's ID
+let isAuthReady = false; // Flag to indicate if authentication state has been determined
 
 // Modal & form elements
 const modal = document.getElementById("task-modal");
@@ -51,17 +52,20 @@ function toggleModal(show) {
   }
 }
 
-// Function to load events from Firebase for the current user
+// Function to load events from Firebase
 async function loadEvents(fetchInfo, successCallback, failureCallback) {
-  if (!userId) {
-    // If user is not authenticated yet, return empty array
+  // Only attempt to load events if authentication is ready and userId is available
+  if (!isAuthReady || !userId) {
+    console.log("Authentication not ready or userId not set. Returning empty events.");
     successCallback([]);
     return;
   }
 
   try {
+    console.log(`Attempting to load events for userId: ${userId}`);
     // Query events specific to the current user
-    const userEventsQuery = query(collection(db, `artifacts/${appId}/users/${userId}/events`));
+    const userEventsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/events`);
+    const userEventsQuery = query(userEventsCollectionRef);
     const snapshot = await getDocs(userEventsQuery);
     const events = snapshot.docs.map(doc => {
       const data = doc.data();
@@ -77,6 +81,7 @@ async function loadEvents(fetchInfo, successCallback, failureCallback) {
         classNames: [`fc-event-${data.category}`]
       };
     });
+    console.log("Events loaded:", events);
     successCallback(events); // Pass events to FullCalendar
   } catch (error) {
     console.error("Error loading events:", error);
@@ -90,6 +95,7 @@ form.onsubmit = async e => {
 
   if (!userId) {
     console.error("User not authenticated. Cannot save event.");
+    // In a real app, show a user-friendly message
     return;
   }
 
@@ -98,17 +104,18 @@ form.onsubmit = async e => {
     start: startInput.value,
     end: endInput.value,
     category: categoryInput.value,
-    // Add a userId field to associate events with the user
-    userId: userId
+    userId: userId // Associate events with the user
   };
 
   try {
     if (selectedEvent) {
       // If an event is selected, update it
       await updateDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, selectedEvent.id), eventData);
+      console.log("Event updated:", selectedEvent.id);
     } else {
       // Otherwise, add a new event
-      await addDoc(collection(db, `artifacts/${appId}/users/${userId}/events`), eventData);
+      const docRef = await addDoc(collection(db, `artifacts/${appId}/users/${userId}/events`), eventData);
+      console.log("Event added with ID:", docRef.id);
     }
 
     toggleModal(false); // Hide the modal
@@ -129,6 +136,7 @@ deleteBtn.onclick = async () => {
   try {
     // Delete the document from the user's events collection
     await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, selectedEvent.id));
+    console.log("Event deleted:", selectedEvent.id);
     toggleModal(false); // Hide the modal
     calendar.refetchEvents(); // Refresh calendar events
   } catch (error) {
@@ -143,13 +151,47 @@ closeModalBtn.onclick = () => toggleModal(false);
 // Theme toggle button click handler
 document.getElementById("toggle-theme").onclick = () => {
   document.body.dataset.theme = document.body.dataset.theme === "dark" ? "light" : "dark";
+  console.log("Theme toggled to:", document.body.dataset.theme);
 };
 
 // Initialize FullCalendar when the DOM is loaded
 document.addEventListener("DOMContentLoaded", async () => {
+  console.log("DOM Content Loaded. Initializing calendar...");
   const calendarEl = document.getElementById("calendar");
 
-  // Authenticate user with Firebase
+  // Initialize FullCalendar instance
+  calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: "dayGridMonth", // Display month view initially
+    selectable: true, // Allow date selection
+    editable: false, // Events are not directly editable by drag/drop on calendar
+    height: "auto", // Calendar height adjusts to content
+    events: loadEvents, // Function to load events from Firebase
+    // Handle date clicks to open the modal for adding new events
+    dateClick: info => {
+      console.log("Date clicked:", info.dateStr);
+      startInput.value = info.dateStr + "T00:00"; // Set start time to midnight
+      endInput.value = info.dateStr + "T01:00";   // Set end time to 1 AM
+      toggleModal(true); // Show the modal
+    },
+    // Handle event clicks to open the modal for editing/deleting events
+    eventClick: info => {
+      console.log("Event clicked:", info.event.id, info.event.title);
+      selectedEvent = info.event; // Store the clicked event
+      titleInput.value = info.event.title;
+      // Format dates to YYYY-MM-DDTHH:MM for datetime-local input
+      startInput.value = info.event.start.toISOString().slice(0, 16);
+      // Handle cases where end date might be null
+      endInput.value = info.event.end?.toISOString().slice(0, 16) || "";
+      categoryInput.value = info.event.extendedProps.category;
+      toggleModal(true); // Show the modal
+    }
+  });
+
+  // Render the calendar immediately after instantiation
+  calendar.render();
+  console.log("Calendar rendered.");
+
+  // Authenticate user with Firebase and then refetch events
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       // User is signed in
@@ -158,45 +200,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       // User is signed out, sign in anonymously
       try {
-        if (typeof __initial_auth_token !== 'undefined') {
+        console.log("No user signed in. Attempting anonymous sign-in...");
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
+          console.log("Signed in with custom token.");
         } else {
           await signInAnonymously(auth);
+          console.log("Signed in anonymously.");
         }
         userId = auth.currentUser.uid;
-        console.log("Signed in anonymously:", userId);
+        console.log("Current user ID after sign-in:", userId);
       } catch (error) {
-        console.error("Error signing in:", error);
+        console.error("Error during authentication:", error);
         // Handle authentication error, perhaps show a message to the user
       }
     }
-
-    // Initialize FullCalendar only after authentication is ready
-    calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: "dayGridMonth", // Display month view initially
-      selectable: true, // Allow date selection
-      editable: false, // Events are not directly editable by drag/drop on calendar
-      height: "auto", // Calendar height adjusts to content
-      events: loadEvents, // Function to load events from Firebase
-      // Handle date clicks to open the modal for adding new events
-      dateClick: info => {
-        startInput.value = info.dateStr + "T00:00"; // Set start time to midnight
-        endInput.value = info.dateStr + "T01:00";   // Set end time to 1 AM
-        toggleModal(true); // Show the modal
-      },
-      // Handle event clicks to open the modal for editing/deleting events
-      eventClick: info => {
-        selectedEvent = info.event; // Store the clicked event
-        titleInput.value = info.event.title;
-        // Format dates to YYYY-MM-DDTHH:MM for datetime-local input
-        startInput.value = info.event.start.toISOString().slice(0, 16);
-        // Handle cases where end date might be null
-        endInput.value = info.event.end?.toISOString().slice(0, 16) || "";
-        categoryInput.value = info.event.extendedProps.category;
-        toggleModal(true); // Show the modal
-      }
-    });
-
-    calendar.render(); // Render the calendar
+    isAuthReady = true; // Set auth ready flag
+    calendar.refetchEvents(); // Refetch events now that auth is ready
+    console.log("Authentication state determined. Refetching events.");
   });
 });
