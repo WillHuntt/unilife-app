@@ -30,6 +30,11 @@ window.addEventListener('mouseout', () => {
     mouse.y = undefined;
 });
 
+// Helper to get computed style of a CSS variable
+function getCssVariable(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
 // Particle class to create individual particles
 class Particle {
     constructor(x, y, directionX, directionY, size, color) {
@@ -72,12 +77,6 @@ class Particle {
                 if (this.size > minParticleSize) {
                     this.size -= 0.1; // Slightly shrink
                 }
-                // Push particles away (optional, can be subtle)
-                // const forceDirectionX = dx / distance;
-                // const forceDirectionY = dy / distance;
-                // const force = (mouse.radius - distance) / mouse.radius;
-                // this.x -= forceDirectionX * force * 5;
-                // this.y -= forceDirectionY * force * 5;
             } else if (this.size < maxParticleSize) {
                 this.size += 0.05; // Grow back to original size
             }
@@ -89,16 +88,30 @@ class Particle {
     }
 }
 
-// Function to initialize particles
+// Function to initialize particles based on theme
 function initParticles() {
     particles.length = 0; // Clear existing particles
+
+    // Determine particle color based on current theme
+    const currentTheme = document.body.dataset.theme;
+    let particleBaseColor;
+    if (currentTheme === 'dark') {
+        // For dark mode, use a translucent white/light color
+        particleBaseColor = '255, 255, 255';
+    } else {
+        // For light mode, use a translucent dark grey/blue from the theme's text color
+        // Using a slightly lighter version of --text or directly defining a dark subtle color
+        // Example: '52, 73, 94' from --text or a softer '100, 100, 100' for light grey
+        particleBaseColor = '100, 100, 100'; // A subtle dark grey for light mode
+    }
+
     for (let i = 0; i < particleCount; i++) {
         let size = Math.random() * (maxParticleSize - minParticleSize) + minParticleSize;
         let x = Math.random() * (canvas.width - size * 2) + size;
         let y = Math.random() * (canvas.height - size * 2) + size;
         let directionX = (Math.random() * particleSpeed * 2) - particleSpeed; // -0.5 to 0.5
         let directionY = (Math.random() * particleSpeed * 2) - particleSpeed; // -0.5 to 0.5
-        let color = 'rgba(255, 255, 255, ' + (Math.random() * 0.7 + 0.3).toFixed(2) + ')'; // Random opacity for subtle glow
+        let color = `rgba(${particleBaseColor}, ${ (Math.random() * 0.7 + 0.3).toFixed(2) })`; // Random opacity for subtle glow
 
         particles.push(new Particle(x, y, directionX, directionY, size, color));
     }
@@ -120,13 +133,22 @@ function animateParticles() {
 function setCanvasDimensions() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    initParticles(); // Reinitialize particles on resize
+    initParticles(); // Reinitialize particles on resize (to update color if theme changed)
 }
 
 // Event listeners
 window.addEventListener('load', () => {
     setCanvasDimensions();
     animateParticles();
+});
+
+// Also re-initialize particles if the theme changes via button/system preference
+document.body.addEventListener('transitionend', (event) => {
+    // Check if the transition was on the body's background-color or color property
+    // This is a heuristic to detect theme changes if not explicitly triggered by button click
+    if (event.propertyName === 'background-color' || event.propertyName === 'color') {
+        initParticles(); // Reinitialize particles to update their color based on new theme
+    }
 });
 
 window.addEventListener('resize', setCanvasDimensions);
