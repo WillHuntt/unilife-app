@@ -1,5 +1,35 @@
-// Firebase config (will be replaced by Canvas runtime)
-const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+// Firebase config (will be replaced by Canvas runtime, or use fallback)
+// This is the default configuration, using the values you provided initially.
+const defaultFirebaseConfig = {
+  apiKey: "AIzaSyAEMOiOm_ksNO57NYp2sNh5va0y6Y40kR0",
+  authDomain: "personal-reminder-app.firebaseapp.com",
+  projectId: "personal-reminder-app",
+  storageBucket: "personal-reminder-app.firebasestorage.app",
+  messagingSenderId: "530943110596",
+  appId: "1:530943110596:web:753349f5577bd39eeb4891",
+  measurementId: "G-255K8FCD4J"
+};
+
+let firebaseConfig = defaultFirebaseConfig; // Start with the default config
+
+// Check if Canvas environment provides a Firebase config
+if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+    try {
+        const canvasConfig = JSON.parse(__firebase_config);
+        // Validate if the Canvas-provided config has essential properties
+        if (canvasConfig.projectId && canvasConfig.apiKey) {
+            firebaseConfig = canvasConfig; // Use Canvas config if valid
+            console.log("Using Canvas-provided Firebase config.");
+        } else {
+            console.warn("Canvas-provided Firebase config is incomplete (missing projectId or apiKey). Using default config.");
+        }
+    } catch (e) {
+        console.error("Error parsing Canvas-provided Firebase config. Using default config.", e);
+    }
+} else {
+    console.warn("No Canvas-provided Firebase config found. Using default config.");
+}
+
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
 // Firebase Init
@@ -22,7 +52,7 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// Initialize Firebase
+// Initialize Firebase with the determined config
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -201,6 +231,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // User is signed out, sign in anonymously
       try {
         console.log("No user signed in. Attempting anonymous sign-in...");
+        // Use __initial_auth_token if available, otherwise sign in anonymously
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
           console.log("Signed in with custom token.");
