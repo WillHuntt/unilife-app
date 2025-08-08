@@ -125,7 +125,7 @@ function toggleTaskModal(show) {
   if (!show) {
     // ONLY reset form and selectedEvent when closing the modal
     taskForm.reset();
-    selectedEvent = null;
+    selectedEvent = null; // This is the fix for editing: only nullify on close
     colorPicker.value = "#3498db";
     iconPicker.value = "";
   }
@@ -573,7 +573,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       userId = user.uid;
       isAuthReady = true;
       console.log("onAuthStateChanged: User authenticated. UID:", userId);
-      console.log("onAuthStateChanged: Attempting to show user info and hide auth forms.");
+      console.log("onAuthStateChanged: Showing user info, hiding auth forms.");
 
       // Show user info and hide auth forms
       if (userInfoDisplay) {
@@ -596,7 +596,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       userId = null;
       isAuthReady = false;
       console.log("onAuthStateChanged: No user signed in.");
-      console.log("onAuthStateChanged: Attempting to hide user info and show auth forms.");
+      console.log("onAuthStateChanged: Hiding user info, showing auth forms.");
 
       // Hide user info and show auth forms
       if (userInfoDisplay) {
