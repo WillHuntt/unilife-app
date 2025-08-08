@@ -1,14 +1,14 @@
 /* Root variables for light theme (default) */
 :root {
-  --bg: #f8f9fa; /* Light background */
-  --text: #212529; /* Dark text */
-  --card: #ffffff; /* Card background */
-  --border: #dee2e6; /* Light border */
-  --primary: #007bff; /* Primary blue for university */
-  --secondary: #28a745; /* Secondary green for fitness */
-  --accent: #ffc107; /* Accent yellow for other */
-  --danger: #dc3545; /* Red for delete */
-  --info: #6c757d; /* Grey for cancel */
+  --bg: #f0f4f8; /* Soft light background */
+  --text: #2c3e50; /* Deep charcoal text */
+  --card: #ffffff; /* Clean white card background */
+  --border: #e0e6ed; /* Light grey border */
+  --primary: #3498db; /* Vibrant blue for university */
+  --secondary: #2ecc71; /* Fresh green for fitness */
+  --accent: #f39c12; /* Warm orange for other */
+  --danger: #e74c3c; /* Alert red for delete */
+  --info: #95a5a6; /* Muted grey for cancel */
   --shadow-light: rgba(0, 0, 0, 0.08);
   --shadow-dark: rgba(0, 0, 0, 0.25);
   --google-blue: #4285f4; /* Google brand blue */
@@ -17,30 +17,30 @@
 
 /* Dark theme variables applied automatically if system prefers dark */
 @media (prefers-color-scheme: dark) {
-  :root { /* Apply to root if system prefers dark and no manual override */
-    --bg: #1a1a1a;
-    --text: #e0e0e0;
-    --card: #2c2c2c;
-    --border: #444444;
-    --primary: #66b3ff; /* Lighter blue for dark theme */
-    --secondary: #66cc80; /* Lighter green for dark theme */
-    --accent: #ffda66; /* Lighter yellow for dark theme */
-    --danger: #ff6b6b;
-    --info: #a0a0a0;
+  :root {
+    --bg: #1a202c; /* Dark charcoal background */
+    --text: #e2e8f0; /* Light grey text */
+    --card: #2d3748; /* Darker card background */
+    --border: #4a5568; /* Muted dark border */
+    --primary: #63b3ed; /* Lighter blue for dark theme */
+    --secondary: #48bb78; /* Lighter green for dark theme */
+    --accent: #f6ad55; /* Muted gold for dark theme */
+    --danger: #fc8181; /* Lighter red */
+    --info: #a0aec0; /* Lighter grey */
   }
 }
 
 /* Dark theme variables applied when data-theme="dark" is explicitly set (manual override) */
 body[data-theme="dark"] {
-  --bg: #1a1a1a;
-  --text: #e0e0e0;
-  --card: #2c2c2c;
-  --border: #444444;
-  --primary: #66b3ff; /* Lighter blue for dark theme */
-  --secondary: #66cc80; /* Lighter green for dark theme */
-  --accent: #ffda66; /* Lighter yellow for dark theme */
-  --danger: #ff6b6b;
-  --info: #a0a0a0;
+  --bg: #1a202c;
+  --text: #e2e8f0;
+  --card: #2d3748;
+  --border: #4a5568;
+  --primary: #63b3ed;
+  --secondary: #48bb78;
+  --accent: #f6ad55;
+  --danger: #fc8181;
+  --info: #a0aec0;
 }
 
 
@@ -90,12 +90,39 @@ header h1 {
   cursor: pointer;
   box-shadow: 0 2px 5px var(--shadow-light);
   transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  position: relative; /* For tooltip */
 }
 
 #toggle-theme:hover {
   background-color: var(--border);
   box-shadow: 0 4px 8px var(--shadow-dark);
 }
+
+/* Tooltip styles */
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 100%; /* Position below the button */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--text);
+  color: var(--bg);
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  margin-top: 8px;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
 
 /* Calendar container */
 #calendar {
@@ -104,6 +131,7 @@ header h1 {
   padding: 1rem; /* Increased padding */
   box-shadow: 0 4px 15px var(--shadow-light); /* Softer, larger shadow */
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  min-height: 400px; /* Ensure calendar has a minimum height */
 }
 
 /* FullCalendar specific overrides */
@@ -143,6 +171,13 @@ header h1 {
 
 .fc-daygrid-day:hover {
   background-color: var(--border); /* Subtle hover effect on days */
+}
+
+/* Custom event icon styling */
+.fc-event-main-frame .event-icon {
+  margin-right: 5px;
+  font-size: 0.9em; /* Adjust size as needed */
+  vertical-align: middle;
 }
 
 /* Modal styling */
@@ -196,6 +231,15 @@ header h1 {
   color: var(--text);
   font-size: 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal input[type="color"] {
+  height: 40px; /* Make color picker larger */
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  width: 100%; /* Full width for color picker */
 }
 
 .modal input:focus,
@@ -261,7 +305,7 @@ header h1 {
   background-color: #545b62;
 }
 
-/* Event category colors */
+/* Event category colors (now used as defaults if no custom color) */
 .fc-event-university {
   background-color: var(--primary) !important;
   border-color: var(--primary) !important;
@@ -365,6 +409,23 @@ header h1 {
 
 .google-btn:hover {
   background-color: var(--google-blue-dark) !important;
+}
+
+/* Empty State Message */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--info);
+  font-style: italic;
+  font-size: 1.1rem;
+  background-color: var(--card);
+  border-radius: 12px;
+  margin-top: 1rem;
+  box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+.empty-state.hidden {
+  display: none;
 }
 
 /* Responsive adjustments */

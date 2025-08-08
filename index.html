@@ -26,15 +26,17 @@
   <div class="container">
     <header>
       <h1>My Reminder Calendar</h1>
-      <button id="toggle-theme" aria-label="Toggle theme">🌗</button>
+      <button id="toggle-theme" aria-label="Toggle theme" data-tooltip="Toggle Light/Dark Theme">🌗</button>
     </header>
     <div id="calendar"></div>
+    <div id="empty-calendar-message" class="empty-state hidden">
+      <p>Looks like your calendar is empty! Click on a date to add your first reminder.</p>
+    </div>
   </div>
 
   <!-- Authentication Section -->
   <div class="auth-section container">
     <h2>Sign In / Sign Up</h2>
-    <!-- You can keep Email/Password or remove if only Google is desired -->
     <input type="email" id="auth-email" placeholder="Email" />
     <input type="password" id="auth-password" placeholder="Password" />
     <div class="auth-buttons">
@@ -64,6 +66,20 @@
         <option value="university">University</option>
         <option value="fitness">Fitness</option>
         <option value="other">Other</option>
+      </select>
+
+      <label for="color-picker">Event Color</label>
+      <input type="color" id="color-picker" value="#007bff" />
+
+      <label for="icon-picker">Event Icon</label>
+      <select id="icon-picker">
+        <option value="">No Icon</option>
+        <option value="📚">📚 University</option>
+        <option value="💪">💪 Fitness</option>
+        <option value="✈️">✈️ Travel</option>
+        <option value="🎂">🎂 Birthday</option>
+        <option value="💼">💼 Work</option>
+        <option value="💡">💡 Idea</option>
       </select>
 
       <div class="modal-buttons">

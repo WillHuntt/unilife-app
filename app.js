@@ -83,18 +83,21 @@ const titleInput = document.getElementById("title");
 const startInput = document.getElementById("start");
 const endInput = document.getElementById("end");
 const categoryInput = document.getElementById("category");
+const colorPicker = document.getElementById("color-picker"); // New color picker input
+const iconPicker = document.getElementById("icon-picker");   // New icon picker select
 const deleteBtn = document.getElementById("delete-task-btn");
 const closeModalBtn = document.getElementById("close-modal-btn");
+const emptyCalendarMessage = document.getElementById("empty-calendar-message"); // Empty state message
 
 // Authentication UI elements
 const emailInput = document.getElementById("auth-email");
 const passwordInput = document.getElementById("auth-password");
 const signUpBtn = document.getElementById("auth-signup-btn");
 const signInBtn = document.getElementById("auth-signin-btn");
-const googleSignInBtn = document.getElementById("google-signin-btn"); // New Google button
+const googleSignInBtn = document.getElementById("google-signin-btn");
 const signOutBtn = document.getElementById("auth-signout-btn");
 const authStatusDiv = document.getElementById("auth-status");
-const toggleThemeBtn = document.getElementById("toggle-theme"); // Reference to the theme toggle button
+const toggleThemeBtn = document.getElementById("toggle-theme");
 
 // Function to toggle modal visibility
 function toggleModal(show) {
@@ -103,6 +106,8 @@ function toggleModal(show) {
   if (!show) {
     form.reset();
     selectedEvent = null;
+    colorPicker.value = "#007bff"; // Reset color picker to default primary
+    iconPicker.value = ""; // Reset icon picker
   }
 }
 
@@ -111,13 +116,13 @@ async function loadEvents(fetchInfo, successCallback, failureCallback) {
   // Only attempt to load events if authentication is ready and userId is available
   if (!isAuthReady || !userId) {
     console.log("Authentication not ready or userId not set. Returning empty events.");
+    emptyCalendarMessage.classList.remove("hidden"); // Show empty message if not authenticated
     successCallback([]);
     return;
   }
 
   try {
     console.log(`Attempting to load events for userId: ${userId}`);
-    // Query events specific to the current user
     const userEventsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/events`);
     const userEventsQuery = query(userEventsCollectionRef);
     const snapshot = await getDocs(userEventsQuery);
@@ -125,31 +130,44 @@ async function loadEvents(fetchInfo, successCallback, failureCallback) {
       const data = doc.data();
       return {
         id: doc.id,
-        title: data.title,
+        title: data.icon ? `${data.icon} ${data.title}` : data.title, // Prepend icon to title
         start: data.start,
         end: data.end,
         extendedProps: {
-          category: data.category
+          category: data.category,
+          originalTitle: data.title, // Store original title without icon
+          color: data.color || null, // Store custom color
+          icon: data.icon || null    // Store custom icon
         },
-        // Apply category-specific classes for styling
-        classNames: [`fc-event-${data.category}`]
+        // Use custom color if available, otherwise fall back to category class
+        backgroundColor: data.color || '',
+        borderColor: data.color || '',
+        classNames: data.color ? [] : [`fc-event-${data.category}`] // Only apply category class if no custom color
       };
     });
     console.log("Events loaded:", events);
-    successCallback(events); // Pass events to FullCalendar
+
+    // Show/hide empty message based on loaded events
+    if (events.length === 0) {
+      emptyCalendarMessage.classList.remove("hidden");
+    } else {
+      emptyCalendarMessage.classList.add("hidden");
+    }
+
+    successCallback(events);
   } catch (error) {
     console.error("Error loading events:", error);
-    failureCallback(error); // Notify FullCalendar of error
+    failureCallback(error);
+    emptyCalendarMessage.classList.remove("hidden"); // Show empty message on error
   }
 }
 
 // Function to save (add or edit) an event to Firebase
 form.onsubmit = async e => {
-  e.preventDefault(); // Prevent default form submission
+  e.preventDefault();
 
   if (!userId) {
     console.error("User not authenticated. Cannot save event.");
-    // In a real app, show a user-friendly message
     return;
   }
 
@@ -158,25 +176,24 @@ form.onsubmit = async e => {
     start: startInput.value,
     end: endInput.value,
     category: categoryInput.value,
-    userId: userId // Associate events with the user
+    color: colorPicker.value, // Save custom color
+    icon: iconPicker.value,   // Save custom icon
+    userId: userId
   };
 
   try {
     if (selectedEvent) {
-      // If an event is selected, update it
       await updateDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, selectedEvent.id), eventData);
       console.log("Event updated:", selectedEvent.id);
     } else {
-      // Otherwise, add a new event
       const docRef = await addDoc(collection(db, `artifacts/${appId}/users/${userId}/events`), eventData);
       console.log("Event added with ID:", docRef.id);
     }
 
-    toggleModal(false); // Hide the modal
-    calendar.refetchEvents(); // Refresh calendar events
+    toggleModal(false);
+    calendar.refetchEvents();
   } catch (error) {
     console.error("Error saving event:", error);
-    // In a real app, you might show a user-friendly error message
   }
 };
 
@@ -188,14 +205,12 @@ deleteBtn.onclick = async () => {
   }
 
   try {
-    // Delete the document from the user's events collection
     await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, selectedEvent.id));
     console.log("Event deleted:", selectedEvent.id);
-    toggleModal(false); // Hide the modal
-    calendar.refetchEvents(); // Refresh calendar events
+    toggleModal(false);
+    calendar.refetchEvents();
   } catch (error) {
     console.error("Error deleting event:", error);
-    // In a real app, you might show a user-friendly error message
   }
 };
 
@@ -250,14 +265,13 @@ if (toggleThemeBtn) {
 // --- Authentication Functions ---
 
 // Handle User Sign Up (Email/Password)
-if (signUpBtn) { // Check if element exists
+if (signUpBtn) {
   signUpBtn.onclick = async () => {
     const email = emailInput.value;
     const password = passwordInput.value;
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       console.log("User signed up (Email/Password):", userCredential.user.uid);
-      // onAuthStateChanged will handle setting userId and refetching events
     } catch (error) {
       console.error("Error signing up:", error.message);
       authStatusDiv.textContent = `Sign Up Error: ${error.message}`;
@@ -266,14 +280,13 @@ if (signUpBtn) { // Check if element exists
 }
 
 // Handle User Sign In (Email/Password)
-if (signInBtn) { // Check if element exists
+if (signInBtn) {
   signInBtn.onclick = async () => {
     const email = emailInput.value;
     const password = passwordInput.value;
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("User signed in (Email/Password):", userCredential.user.uid);
-      // onAuthStateChanged will handle setting userId and refetching events
     } catch (error) {
       console.error("Error signing in:", error.message);
       authStatusDiv.textContent = `Sign In Error: ${error.message}`;
@@ -282,22 +295,18 @@ if (signInBtn) { // Check if element exists
 }
 
 // Handle Google Sign In
-if (googleSignInBtn) { // Check if element exists
+if (googleSignInBtn) {
   googleSignInBtn.onclick = async () => {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      // This gives you a Google Access Token. You can use it to access the Google API.
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential.accessToken;
-      // The signed-in user info.
       const user = result.user;
       console.log("User signed in with Google:", user.uid, user.displayName);
-      // onAuthStateChanged will handle setting userId and refetching events
     } catch (error) {
       console.error("Error during Google Sign-In:", error.code, error.message);
       authStatusDiv.textContent = `Google Sign-In Error: ${error.message}`;
-      // Handle specific errors, e.g., popup closed by user
       if (error.code === 'auth/popup-closed-by-user') {
         console.log("Google Sign-In popup was closed by the user.");
       }
@@ -306,17 +315,17 @@ if (googleSignInBtn) { // Check if element exists
 }
 
 // Handle User Sign Out
-if (signOutBtn) { // Check if element exists
+if (signOutBtn) {
   signOutBtn.onclick = async () => {
     try {
       await signOut(auth);
       console.log("User signed out.");
-      userId = null; // Clear userId
-      isAuthReady = false; // Reset auth status
-      calendar.refetchEvents(); // Clear calendar events for signed out user
+      userId = null;
+      isAuthReady = false;
+      calendar.refetchEvents();
       authStatusDiv.textContent = "Not signed in.";
-      emailInput.value = ""; // Clear email field
-      passwordInput.value = ""; // Clear password field
+      emailInput.value = "";
+      passwordInput.value = "";
       localStorage.removeItem(THEME_STORAGE_KEY); // Remove user's manual theme preference
       setTheme(getSystemTheme()); // Revert to system theme on sign out
     } catch (error) {
@@ -339,27 +348,83 @@ document.addEventListener("DOMContentLoaded", async () => {
   calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: "dayGridMonth", // Display month view initially
     selectable: true, // Allow date selection
-    editable: false, // Events are not directly editable by drag/drop on calendar
+    editable: true, // Enable drag-and-drop and resizing
     height: "auto", // Calendar height adjusts to content
     events: loadEvents, // Function to load events from Firebase
+    headerToolbar: { // New header toolbar for view switching
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay' // Added week and day views
+    },
+    slotMinTime: '06:00:00', // Start day at 6 AM
+    slotMaxTime: '22:00:00', // End day at 10 PM
+    eventDidMount: function(info) { // Custom rendering for events (e.g., custom color)
+      if (info.event.extendedProps.color) {
+        info.el.style.backgroundColor = info.event.extendedProps.color;
+        info.el.style.borderColor = info.event.extendedProps.color;
+        info.el.style.color = 'white'; // Ensure text is readable on custom color
+      }
+      // If you want to add the icon dynamically to the event title element
+      // This is handled by prepending the icon in loadEvents now.
+    },
     // Handle date clicks to open the modal for adding new events
     dateClick: info => {
       console.log("Date clicked:", info.dateStr);
       startInput.value = info.dateStr + "T00:00"; // Set start time to midnight
       endInput.value = info.dateStr + "T01:00";   // Set end time to 1 AM
+      colorPicker.value = "#007bff"; // Set default color for new event
+      iconPicker.value = ""; // No default icon
       toggleModal(true); // Show the modal
     },
     // Handle event clicks to open the modal for editing/deleting events
     eventClick: info => {
       console.log("Event clicked:", info.event.id, info.event.title);
       selectedEvent = info.event; // Store the clicked event
-      titleInput.value = info.event.title;
-      // Format dates to YYYY-MM-DDTHH:MM for datetime-local input
+      titleInput.value = info.event.extendedProps.originalTitle; // Use original title
       startInput.value = info.event.start.toISOString().slice(0, 16);
-      // Handle cases where end date might be null
       endInput.value = info.event.end?.toISOString().slice(0, 16) || "";
       categoryInput.value = info.event.extendedProps.category;
+      colorPicker.value = info.event.extendedProps.color || "#007bff"; // Set existing color or default
+      iconPicker.value = info.event.extendedProps.icon || ""; // Set existing icon or none
       toggleModal(true); // Show the modal
+    },
+    // Handle event drop (drag-and-drop)
+    eventDrop: async function(info) {
+      console.log("Event dropped:", info.event.id, info.event.start, info.event.end);
+      if (!userId) {
+        console.error("User not authenticated. Cannot update event on drop.");
+        info.revert(); // Revert the event to its original position
+        return;
+      }
+      try {
+        await updateDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, info.event.id), {
+          start: info.event.start.toISOString(),
+          end: info.event.end ? info.event.end.toISOString() : null
+        });
+        console.log("Event updated in Firestore after drop.");
+      } catch (error) {
+        console.error("Error updating event on drop:", error);
+        info.revert(); // Revert if update fails
+      }
+    },
+    // Handle event resize
+    eventResize: async function(info) {
+      console.log("Event resized:", info.event.id, info.event.start, info.event.end);
+      if (!userId) {
+        console.error("User not authenticated. Cannot update event on resize.");
+        info.revert(); // Revert the event
+        return;
+      }
+      try {
+        await updateDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, info.event.id), {
+          start: info.event.start.toISOString(),
+          end: info.event.end ? info.event.end.toISOString() : null
+        });
+        console.log("Event updated in Firestore after resize.");
+      } catch (error) {
+        console.error("Error updating event on resize:", error);
+        info.revert(); // Revert if update fails
+      }
     }
   });
 
@@ -370,17 +435,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Authenticate user with Firebase and then refetch events
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // User is signed in (could be anonymous, email/password, or Google)
       userId = user.uid;
       isAuthReady = true;
       console.log("User authenticated:", userId);
-      authStatusDiv.textContent = `Signed in as: ${user.email || user.displayName || user.uid}`; // Display user info
-      calendar.refetchEvents(); // Load events for the authenticated user
+      authStatusDiv.textContent = `Signed in as: ${user.email || user.displayName || user.uid}`;
+      calendar.refetchEvents();
     } else {
-      // No user is signed in. Attempt anonymous sign-in as a fallback.
       try {
         console.log("No user signed in. Attempting anonymous sign-in...");
-        // Use __initial_auth_token if available, otherwise sign in anonymously
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
           console.log("Signed in with custom token.");
@@ -388,11 +450,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           await signInAnonymously(auth);
           console.log("Signed in anonymously.");
         }
-        // After anonymous sign-in, the onAuthStateChanged listener will fire again
-        // with the new anonymous user, setting userId and refetching events.
       } catch (error) {
         console.error("Error during initial authentication:", error);
-        // If even anonymous sign-in fails, display a critical error
         authStatusDiv.textContent = "Authentication failed. Please check console.";
       }
     }
