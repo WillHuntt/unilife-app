@@ -211,6 +211,10 @@ header h1 {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease; /* Added transform for animation */
+  /* Added for scrolling functionality */
+  max-height: 90vh; /* Limit modal height to 90% of viewport height */
+  overflow-y: auto; /* Enable vertical scrolling if content overflows */
+  box-sizing: border-box; /* Include padding in the height calculation */
 }
 
 .modal.hidden {
