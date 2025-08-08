@@ -53,7 +53,7 @@ import {
   getAuth,
   onAuthStateChanged,
   signOut
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"; // Removed signInAnonymously, signInWithCustomToken
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -166,7 +166,6 @@ if (confirmNoBtn) {
 async function loadEvents(fetchInfo, successCallback, failureCallback) {
   if (!isAuthReady || !userId) {
     console.log("Authentication not ready or userId not set. Cannot load events.");
-    // Removed redirect here. The onAuthStateChanged listener will handle it.
     successCallback([]);
     return;
   }
@@ -201,7 +200,6 @@ async function loadEvents(fetchInfo, successCallback, failureCallback) {
     const viewEnd = fetchInfo.end;
 
     fetchedEvents.forEach(event => {
-      // Always add the original event
       allCalendarEvents.push({
         id: event.id,
         title: event.extendedProps.icon ? `${event.extendedProps.icon} ${event.title}` : event.title,
@@ -565,7 +563,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("Date clicked:", info.dateStr);
       if (!userId) {
         showConfirmationDialog("Please sign in to add events.", () => {
-            // Removed redirect here. The onAuthStateChanged listener will handle it.
+            // This confirm dialog will appear, but the onAuthStateChanged below will handle the redirect.
+            // Keeping this for consistency in messaging.
         });
         return;
       }
@@ -674,7 +673,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       userId = null;
       isAuthReady = false;
       console.log("App: No user signed in. Redirecting to portal.html.");
-      window.location.href = 'portal.html'; // This is the main redirect
+      window.location.href = 'portal.html'; // Main redirect to login page
     }
   });
 });

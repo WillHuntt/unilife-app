@@ -38,14 +38,12 @@ if (!firebaseConfig.apiKey) {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getAuth,
-  signInAnonymously,
-  signInWithCustomToken,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"; // Removed signInAnonymously, signInWithCustomToken
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -238,21 +236,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("User already authenticated on portal page. Redirecting to calendar.");
       window.location.href = 'index.html';
     } else {
-      // If no user, try anonymous sign-in (for initial setup/storage capabilities)
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(auth, __initial_auth_token);
-            console.log("Portal: Signed in with custom token.");
-        } else {
-            await signInAnonymously(auth);
-            console.log("Portal: Signed in anonymously.");
-        }
-        authStatus.textContent = "Please sign in to your account.";
-      } catch (error) {
-        console.error("Portal: Error during initial authentication (anonymous sign-in):", error);
-        authStatus.textContent = `Authentication setup failed: ${error.message}`;
-        showConfirmationDialog("Authentication setup failed. Please check console.", () => {});
-      }
+      // If no user, simply update status, no anonymous sign-in
+      console.log("Portal: No user signed in. Awaiting explicit login.");
+      authStatus.textContent = "Please sign in to your account or create a new one.";
     }
   });
 });

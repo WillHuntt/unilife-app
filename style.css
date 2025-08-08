@@ -56,6 +56,19 @@ body {
   display: flex; /* Use flexbox for overall layout */
   flex-direction: column; /* Stack content vertically */
   min-height: 100vh; /* Ensure body takes full viewport height */
+  position: relative; /* Needed for positioning canvas */
+  overflow: hidden; /* Hide any potential canvas overflow */
+}
+
+/* Particle Canvas Styling */
+#particle-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* Place behind other content */
+  background-color: var(--bg); /* Ensure it matches body background for initial load/fallback */
 }
 
 .container {
@@ -63,6 +76,8 @@ body {
   margin: 2rem auto;
   padding: 1.5rem;
   flex-grow: 1; /* Allow container to grow and push footer down */
+  position: relative; /* Ensure container is above the canvas */
+  z-index: 1; /* Place above the canvas */
 }
 
 /* Header styling */
@@ -696,10 +711,6 @@ footer a:hover {
   }
 
   .fc .fc-toolbar-title {
-    font-size: 1.2rem;
-  }
-
-  .fc-button {
     font-size: 0.8rem !important;
     padding: 0.5rem 0.8rem !important;
   }
