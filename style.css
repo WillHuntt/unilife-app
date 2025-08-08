@@ -56,7 +56,7 @@ body {
   display: flex; /* Use flexbox for overall layout */
   flex-direction: column; /* Stack content vertically */
   min-height: 100vh; /* Ensure body takes full viewport height */
-  position: relative; /* Needed for positioning canvas */
+  position: relative; /* Needed for positioning canvas and footer absolute elements */
   overflow-x: hidden; /* Prevent horizontal scrollbar from canvas */
   overflow-y: auto;   /* Allow vertical scrolling for main content */
 }
@@ -144,7 +144,6 @@ header h1 {
   font-weight: 700; /* Bolder for UniLife */
   color: var(--text);
   margin: 0;
-  /* Animation only applies to portal page for now, general h1 won't pulse */
 }
 
 /* Specific styling for the portal page header to ensure title is truly central */
@@ -179,15 +178,6 @@ body.portal-page header h1 {
     transform: scale(1);
     opacity: 1;
   }
-}
-
-/* Position theme controls absolutely on portal page to not affect centering */
-body.portal-page .theme-controls {
-  position: absolute;
-  right: 1.5rem; /* Adjust to match container padding or desired distance from edge */
-  top: 50%; /* Center vertically */
-  transform: translateY(-50%); /* Adjust for vertical centering */
-  z-index: 2; /* Ensure it's above other elements if needed */
 }
 
 
@@ -728,6 +718,7 @@ footer {
   color: var(--text);
   font-size: 0.9rem;
   box-shadow: 0 -2px 8px var(--shadow-light);
+  position: relative; /* Needed for positioning theme controls in footer */
 }
 
 footer a {
@@ -742,7 +733,7 @@ footer a:hover {
   text-decoration: underline;
 }
 
-/* Styling for legal links in the footer */
+/* New: Styling for legal links in the footer */
 .legal-links {
   margin-top: 0.5rem; /* Space above legal links */
   font-size: 0.8rem; /* Slightly smaller for legal text */
@@ -753,19 +744,14 @@ footer a:hover {
   white-space: nowrap; /* Prevent links from breaking across lines */
 }
 
-/* New: Styles for the header on static pages (Terms, Privacy) */
-.static-page-header {
+/* New: Container for theme controls inside the footer */
+.theme-controls-footer {
+  position: absolute;
+  bottom: 1.5rem; /* Distance from bottom of footer */
+  left: 1.5rem;  /* Distance from left of footer */
   display: flex;
-  justify-content: space-between; /* Space out title and controls */
-  align-items: center;
-  margin-bottom: 2rem;
-  position: relative; /* For absolute positioning of controls on desktop */
-}
-
-/* Ensure the title container for static pages takes available space */
-.static-page-header .app-title-container {
-  flex-grow: 1;
-  text-align: center; /* Center the static page title */
+  gap: 0.5rem;
+  z-index: 2; /* Ensure it's above other footer content if needed */
 }
 
 /* Style for the back to login button */
@@ -837,9 +823,19 @@ footer a:hover {
     flex-direction: column;
   }
 
-  .theme-controls {
+  .theme-controls { /* General theme controls (no longer in header for most pages) */
     flex-direction: column;
     gap: 0.2rem;
+  }
+
+  /* Reset absolute positioning for theme controls on smaller portal screens */
+  body.portal-page .theme-controls {
+    position: static;
+    transform: none;
+    margin-top: 1rem; /* Add some space if stacked */
+    flex-direction: row; /* Keep buttons in a row if space allows */
+    justify-content: center;
+    width: 100%; /* Take full width if not absolute */
   }
 
   /* New: Force portal page header to stack and center its contents */
@@ -881,6 +877,16 @@ footer a:hover {
 
   .static-page-header .header-controls .header-btn {
     margin-bottom: 0.5rem; /* Space between stacked buttons */
+  }
+
+  /* Adjust footer theme controls for small screens */
+  .theme-controls-footer {
+    position: static; /* Make it flow naturally within footer */
+    transform: none;
+    margin-top: 1rem; /* Space above them */
+    justify-content: center; /* Center them horizontally */
+    left: auto; /* Remove fixed left */
+    bottom: auto; /* Remove fixed bottom */
   }
 }
 

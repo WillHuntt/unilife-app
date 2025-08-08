@@ -24,12 +24,11 @@
   <div class="container static-page-content">
     <header class="static-page-header">
       <div class="app-title-container">
-        <h1>UniLife Privacy</h1> <!-- Changed to UniLife for consistency -->
+        <h1>UniLife</h1> <!-- Changed to UniLife for consistency -->
       </div>
       <div class="header-controls">
         <button id="back-to-login-btn" class="header-btn">Back to Login</button>
-        <button id="toggle-theme" aria-label="Toggle theme" data-tooltip="Toggle Light/Dark Theme">🌗</button>
-        <button id="reset-theme-btn" aria-label="Reset theme to device preference" data-tooltip="Reset to System Theme">🔄</button>
+        <!-- Theme controls are now in the footer -->
       </div>
     </header>
 
@@ -88,6 +87,10 @@
       <a href="terms.html">Terms of Service</a> |
       <a href="privacy.html">Privacy Policy</a>
     </p>
+    <div class="theme-controls-footer"> <!-- New container for theme controls in footer -->
+      <button id="toggle-theme" aria-label="Toggle theme" data-tooltip="Toggle Light/Dark Theme">🌗</button>
+      <button id="reset-theme-btn" aria-label="Reset theme to device preference" data-tooltip="Reset to System Theme">🔄</button>
+    </div>
   </footer>
   <script>
     // Dynamically set current year for copyright in privacy.html
