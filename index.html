@@ -1,62 +1,50 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Reminder App with Calendar</title>
-  <!-- FullCalendar CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reminder Calendar</title>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body data-theme="light">
   <div class="container">
     <header>
-      <h1>📅 Personal Reminder App</h1>
-      <button id="theme-toggle">Toggle Theme</button>
+      <h1>My Reminder Calendar</h1>
+      <button id="toggle-theme">🌗</button>
     </header>
     <div id="calendar"></div>
-    
-    <!-- Modal for adding/editing tasks -->
-    <div id="task-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <form id="task-form">
-        <h2 id="modal-title">Add Task</h2>
-        <label>
-          Task:
-          <input type="text" id="task-input" required />
-        </label>
-        <label>
-          Category:
-          <select id="category">
-            <option value="university">University</option>
-            <option value="fitness">Fitness</option>
-            <option value="other">Other</option>
-          </select>
-        </label>
-        <label>
-          Due Date:
-          <input type="date" id="due-date" required />
-        </label>
-        <label>
-          Email for reminder (optional):
-          <input type="email" id="email-input" />
-        </label>
-        <input type="hidden" id="task-id" />
-        <div class="modal-buttons">
-          <button type="submit">Save</button>
-          <button type="button" id="delete-task-btn" class="hidden">Delete</button>
-          <button type="button" id="close-modal-btn">Cancel</button>
-        </div>
-      </form>
-    </div>
-
-    <div id="modal-overlay" class="hidden"></div>
   </div>
 
-  <!-- Load Firebase modules -->
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-  
-  <!-- Load your app logic as module -->
-  <script type="module" src="app.js"></script>
+  <!-- Modal -->
+  <div id="task-modal" class="modal hidden">
+    <form id="task-form">
+      <label for="title">Title</label>
+      <input type="text" id="title" required />
+
+      <label for="start">Start</label>
+      <input type="datetime-local" id="start" required />
+
+      <label for="end">End</label>
+      <input type="datetime-local" id="end" required />
+
+      <label for="category">Category</label>
+      <select id="category" required>
+        <option value="university">University</option>
+        <option value="fitness">Fitness</option>
+        <option value="other">Other</option>
+      </select>
+
+      <div class="modal-buttons">
+        <button type="submit">Save</button>
+        <button type="button" id="delete-task-btn">Delete</button>
+        <button type="button" id="close-modal-btn">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
