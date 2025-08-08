@@ -1,7 +1,7 @@
 // Firebase config (will be replaced by Canvas runtime, or use fallback)
 // This is the default configuration, using the values you provided initially.
 const defaultFirebaseConfig = {
-  apiKey: "AIzaSyAEMOiOm_ksNO57NYp2sNh5va0y6Y40kR0",
+  apiKey: "AIzaSyAEMOiOm_ksNO57NYp2sNh5va0y6Y40kR0", // <-- VERIFY THIS API KEY IN YOUR FIREBASE CONSOLE
   authDomain: "personal-reminder-app.firebaseapp.com",
   projectId: "personal-reminder-app",
   storageBucket: "personal-reminder-app.firebasestorage.app",
@@ -29,6 +29,16 @@ if (typeof __firebase_config !== 'undefined' && __firebase_config) {
 } else {
     console.warn("No Canvas-provided Firebase config found. Using default config.");
 }
+
+// Crucial check: Ensure apiKey is present before initializing Firebase
+if (!firebaseConfig.apiKey) {
+    console.error("Firebase API Key is missing. Please ensure it's provided in firebaseConfig.");
+    // You might want to display a user-friendly error message on the UI here
+    // For now, we'll prevent further Firebase initialization
+    alert("Error: Firebase API Key is missing. Please check console for details.");
+    throw new Error("Firebase API Key is missing."); // Stop script execution
+}
+
 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
