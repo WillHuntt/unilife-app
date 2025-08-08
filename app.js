@@ -53,7 +53,7 @@ import {
   getAuth,
   onAuthStateChanged,
   signOut
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"; // Removed signInAnonymously, signInWithCustomToken
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -165,10 +165,9 @@ if (confirmNoBtn) {
 // Function to load events from Firebase
 async function loadEvents(fetchInfo, successCallback, failureCallback) {
   if (!isAuthReady || !userId) {
-    console.log("Authentication not ready or userId not set. Cannot load events. Redirecting to portal.");
-    // Redirect to portal if not authenticated on this page
-    window.location.href = 'portal.html';
-    successCallback([]); // Return empty events while redirecting
+    console.log("Authentication not ready or userId not set. Cannot load events.");
+    // Removed redirect here. The onAuthStateChanged listener will handle it.
+    successCallback([]);
     return;
   }
 
@@ -219,35 +218,31 @@ async function loadEvents(fetchInfo, successCallback, failureCallback) {
         const originalDuration = event.end ? new Date(event.end).getTime() - new Date(event.start).getTime() : 0;
 
         const maxRecurrenceDate = new Date(viewEnd);
-        maxRecurrenceDate.setMonth(maxRecurrenceDate.getMonth() + 3); // Generate for 3 months beyond current view for better coverage
+        maxRecurrenceDate.setMonth(maxRecurrenceDate.getMonth() + 3);
 
         while (currentDate.getTime() <= maxRecurrenceDate.getTime()) {
-          // Advance date based on recurrence type before checking if it's within view
           if (event.extendedProps.recurrence === 'daily') {
             currentDate.setDate(currentDate.getDate() + 1);
           } else if (event.extendedProps.recurrence === 'weekly') {
             currentDate.setDate(currentDate.getDate() + 7);
           } else if (event.extendedProps.recurrence === 'monthly') {
-            // Adjust day to prevent issues like Jan 31 + 1 month = March 2
             const originalDay = new Date(event.start).getDate();
             currentDate.setMonth(currentDate.getMonth() + 1);
             if (currentDate.getDate() !== originalDay) {
-                currentDate.setDate(0); // Set to last day of previous month if day doesn't exist
-                currentDate.setDate(originalDay); // Then set to original day if possible
+                currentDate.setDate(0);
+                currentDate.setDate(originalDay);
             }
           }
 
           let newStartDate = new Date(currentDate);
           let newEndDate = originalDuration > 0 ? new Date(newStartDate.getTime() + originalDuration) : null;
 
-          // Only add event if it falls within the *reasonable display range* for FullCalendar
-          // This prevents generating too many events that are far in the past or future
           const calendarDisplayEnd = new Date(viewEnd);
-          calendarDisplayEnd.setDate(calendarDisplayEnd.getDate() + 1); // Add a day to ensure events on the viewEnd day are included
+          calendarDisplayEnd.setDate(calendarDisplayEnd.getDate() + 1);
 
           if (newStartDate.getTime() < calendarDisplayEnd.getTime() && newEndDate && newEndDate.getTime() > viewStart.getTime()) {
             allCalendarEvents.push({
-                id: `${event.id}-recur-${newStartDate.getTime()}`, // Unique ID for recurring instance
+                id: `${event.id}-recur-${newStartDate.getTime()}`,
                 title: event.extendedProps.icon ? `${event.extendedProps.icon} ${event.title}` : event.title,
                 start: newStartDate.toISOString().slice(0, 16),
                 end: newEndDate ? newEndDate.toISOString().slice(0, 16) : null,
@@ -261,14 +256,14 @@ async function loadEvents(fetchInfo, successCallback, failureCallback) {
                 classNames: event.extendedProps.color ? [] : [`fc-event-${event.extendedProps.category}`]
             });
           } else if (newStartDate.getTime() >= maxRecurrenceDate.getTime()) {
-              break; // Stop generating if we go too far beyond maxRecurrenceDate
+              break;
           }
         }
       }
     });
 
     console.log("Calendar events to render:", allCalendarEvents);
-    currentEvents = fetchedEvents; // Keep original fetched events for dashboard
+    currentEvents = fetchedEvents;
 
     if (fetchedEvents.length === 0) {
       emptyCalendarMessage.classList.remove("hidden");
@@ -423,7 +418,7 @@ async function handleSignOut() {
   try {
     await signOut(auth);
     console.log("User signed out. Redirecting to portal.");
-    window.location.href = 'portal.html'; // Redirect to portal after sign out
+    window.location.href = 'portal.html';
   } catch (error) {
     console.error("Error signing out:", error.message);
     showConfirmationDialog(`Sign Out Error: ${error.message}`, () => {});
@@ -570,7 +565,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("Date clicked:", info.dateStr);
       if (!userId) {
         showConfirmationDialog("Please sign in to add events.", () => {
-            window.location.href = 'portal.html'; // Redirect if not signed in
+            // Removed redirect here. The onAuthStateChanged listener will handle it.
         });
         return;
       }
@@ -679,7 +674,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       userId = null;
       isAuthReady = false;
       console.log("App: No user signed in. Redirecting to portal.html.");
-      window.location.href = 'portal.html'; // Redirect to login page if not signed in
+      window.location.href = 'portal.html'; // This is the main redirect
     }
   });
 });
