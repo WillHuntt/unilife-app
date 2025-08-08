@@ -77,28 +77,28 @@ let userId = null;
 let isAuthReady = false;
 
 // Modal & form elements
-const taskModal = document.getElementById("task-modal"); // Renamed to avoid conflict
-const taskForm = document.getElementById("task-form");   // Renamed
+const taskModal = document.getElementById("task-modal");
+const taskForm = document.getElementById("task-form");
 const titleInput = document.getElementById("title");
 const startInput = document.getElementById("start");
 const endInput = document.getElementById("end");
 const categoryInput = document.getElementById("category");
-const colorPicker = document.getElementById("color-picker"); // New color picker input
-const iconPicker = document.getElementById("icon-picker");   // New icon picker select
+const colorPicker = document.getElementById("color-picker");
+const iconPicker = document.getElementById("icon-picker");
 const deleteBtn = document.getElementById("delete-task-btn");
 const closeModalBtn = document.getElementById("close-modal-btn");
 const emptyCalendarMessage = document.getElementById("empty-calendar-message");
 
 // Authentication UI elements
-const authFormsContainer = document.getElementById("auth-forms-container"); // New container for auth forms
+const authFormsContainer = document.getElementById("auth-forms-container");
 const emailInput = document.getElementById("auth-email");
 const passwordInput = document.getElementById("auth-password");
 const signUpBtn = document.getElementById("auth-signup-btn");
 const signInBtn = document.getElementById("auth-signin-btn");
 const googleSignInBtn = document.getElementById("google-signin-btn");
-const userInfoDisplay = document.getElementById("user-info-display"); // New user info div
-const displayUserEmail = document.getElementById("display-user-email"); // Span for user email
-const signOutBtnTop = document.getElementById("auth-signout-btn-top"); // Sign out button at the top
+const userInfoDisplay = document.getElementById("user-info-display");
+const displayUserEmail = document.getElementById("display-user-email");
+const signOutBtnTop = document.getElementById("auth-signout-btn-top");
 
 const toggleThemeBtn = document.getElementById("toggle-theme");
 const resetThemeBtn = document.getElementById("reset-theme-btn");
@@ -117,18 +117,19 @@ const confirmationModal = document.getElementById("confirmation-modal");
 const confirmationMessage = document.getElementById("confirmation-message");
 const confirmYesBtn = document.getElementById("confirm-yes-btn");
 const confirmNoBtn = document.getElementById("confirm-no-btn");
-let onConfirmCallback = null; // Callback for confirmation dialog
+let onConfirmCallback = null;
 
 // Function to toggle task modal visibility
 function toggleTaskModal(show) {
   taskModal.classList.toggle("hidden", !show);
   if (!show) {
     taskForm.reset();
-    selectedEvent = null;
-    colorPicker.value = "#3498db"; // Reset color picker to default primary
-    iconPicker.value = ""; // Reset icon picker
-    hidePopover(); // Ensure popover is hidden when task modal opens/closes
+    selectedEvent = null; // ONLY reset selectedEvent when closing the modal
+    colorPicker.value = "#3498db";
+    iconPicker.value = "";
   }
+  // Always hide popover when task modal is toggled (opened or closed)
+  hidePopover();
 }
 
 // Function to toggle confirmation modal visibility
@@ -171,7 +172,7 @@ if (confirmNoBtn) {
 // Function to show event popover
 function showPopover(event, jsEvent) {
   selectedEvent = event; // Set selected event for popover actions
-  popoverTitle.textContent = event.extendedProps.originalTitle; // Use original title
+  popoverTitle.textContent = event.extendedProps.originalTitle;
   popoverTime.textContent = `${event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${event.end ? event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'No end time'}`;
   popoverCategory.textContent = `Category: ${event.extendedProps.category}`;
 
@@ -185,7 +186,8 @@ function showPopover(event, jsEvent) {
 // Function to hide event popover
 function hidePopover() {
   eventPopover.classList.add("hidden");
-  selectedEvent = null; // Clear selected event when popover is hidden
+  // IMPORTANT: Do NOT nullify selectedEvent here.
+  // selectedEvent should only be nulled when the task modal is closed.
 }
 
 // Popover button handlers
@@ -198,9 +200,9 @@ if (popoverEditBtn) {
       categoryInput.value = selectedEvent.extendedProps.category;
       colorPicker.value = selectedEvent.extendedProps.color || "#3498db";
       iconPicker.value = selectedEvent.extendedProps.icon || "";
-      toggleTaskModal(true); // Open the main task modal for editing
+      toggleTaskModal(true); // Open the main task modal for editing. This will also hide the popover.
+      // selectedEvent remains set here for the form submission.
     }
-    hidePopover();
   };
 }
 
@@ -210,7 +212,7 @@ if (popoverDeleteBtn) {
       if (confirmed && selectedEvent) {
         await deleteEvent(selectedEvent.id); // Call delete function
       }
-      hidePopover();
+      hidePopover(); // Hide popover after confirmation dialog
     });
   };
 }
@@ -299,6 +301,7 @@ taskForm.onsubmit = async e => {
 
   try {
     if (selectedEvent) {
+      // selectedEvent is correctly available here because hidePopover() no longer nulls it
       await updateDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, selectedEvent.id), eventData);
       console.log("Event updated:", selectedEvent.id);
     } else {
@@ -367,7 +370,7 @@ function getSystemTheme() {
 
 function updateThemeToggleButton(theme) {
   if (toggleThemeBtn) {
-    toggleThemeBtn.textContent = theme === 'dark' ? '☀️' : '🌗';
+    toggleThemeBtn.textContent = theme === 'dark' ? '☀️' : '�';
     toggleThemeBtn.setAttribute('data-tooltip', `Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Theme`);
   }
 }
@@ -440,7 +443,6 @@ if (googleSignInBtn) {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      // const credential = GoogleAuthProvider.credentialFromResult(result); // Not directly used for UI
       const user = result.user;
       console.log("User signed in with Google:", user.uid, user.displayName);
       // UI update handled by onAuthStateChanged
@@ -515,7 +517,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     eventClick: info => {
       // Hide popover if another event is clicked
       if (selectedEvent && selectedEvent.id === info.event.id) {
-        hidePopover(); // Clicked same event, hide popover/modal
+        hidePopover(); // Clicked same event, hide popover
       } else {
         showPopover(info.event, info.jsEvent); // Show popover for this event
       }
@@ -569,13 +571,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (user) {
       userId = user.uid;
       isAuthReady = true;
-      console.log("User authenticated:", userId);
+      console.log("onAuthStateChanged: User authenticated. UID:", userId);
+      console.log("onAuthStateChanged: Attempting to show user info and hide auth forms.");
 
       // Show user info and hide auth forms
-      userInfoDisplay.classList.remove("hidden");
-      authFormsContainer.classList.add("hidden");
+      if (userInfoDisplay) userInfoDisplay.classList.remove("hidden");
+      if (authFormsContainer) authFormsContainer.classList.add("hidden");
+      console.log("onAuthStateChanged: userInfoDisplay hidden status:", userInfoDisplay?.classList.contains("hidden"));
+      console.log("onAuthStateChanged: authFormsContainer hidden status:", authFormsContainer?.classList.contains("hidden"));
 
-      // Display user email or UID
+
       displayUserEmail.textContent = user.email || user.displayName || `User ID: ${user.uid}`;
 
       // Clear email/password inputs (important if they were partially filled before login)
@@ -584,29 +589,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       calendar.refetchEvents();
     } else {
-      // User is signed out
       userId = null;
       isAuthReady = false;
-      console.log("No user signed in.");
+      console.log("onAuthStateChanged: No user signed in.");
+      console.log("onAuthStateChanged: Attempting to hide user info and show auth forms.");
 
       // Hide user info and show auth forms
-      userInfoDisplay.classList.add("hidden");
-      authFormsContainer.classList.remove("hidden");
+      if (userInfoDisplay) userInfoDisplay.classList.add("hidden");
+      if (authFormsContainer) authFormsContainer.classList.remove("hidden");
+      console.log("onAuthStateChanged: userInfoDisplay hidden status:", userInfoDisplay?.classList.contains("hidden"));
+      console.log("onAuthStateChanged: authFormsContainer hidden status:", authFormsContainer?.classList.contains("hidden"));
 
-      // Attempt anonymous sign-in if not already
       try {
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
-          // The onAuthStateChanged listener will fire again with the anonymous user
+          console.log("onAuthStateChanged: Signed in with custom token (anonymous).");
         } else {
           await signInAnonymously(auth);
-          // The onAuthStateChanged listener will fire again with the anonymous user
+          console.log("onAuthStateChanged: Signed in anonymously.");
         }
       } catch (error) {
-        console.error("Error during initial authentication (anonymous sign-in):", error);
+        console.error("onAuthStateChanged: Error during initial authentication (anonymous sign-in):", error);
         showConfirmationDialog("Authentication failed. Please check console.", () => {});
       }
-      calendar.refetchEvents(); // Refetch events (will be empty if not authenticated)
+      calendar.refetchEvents();
     }
   });
 });
