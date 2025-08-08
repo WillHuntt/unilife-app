@@ -523,7 +523,7 @@ header h1 {
 }
 
 .event-popover .popover-buttons {
-  display: flex;
+  display: flex; /* Ensure buttons are laid out in a row */
   gap: 0.5rem;
   margin-top: 1rem;
   justify-content: space-between;
