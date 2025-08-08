@@ -742,7 +742,7 @@ footer a:hover {
   text-decoration: underline;
 }
 
-/* New: Styling for legal links in the footer */
+/* Styling for legal links in the footer */
 .legal-links {
   margin-top: 0.5rem; /* Space above legal links */
   font-size: 0.8rem; /* Slightly smaller for legal text */
@@ -751,6 +751,51 @@ footer a:hover {
 .legal-links a {
   margin: 0 0.5rem; /* Space between legal links */
   white-space: nowrap; /* Prevent links from breaking across lines */
+}
+
+/* New: Styles for the header on static pages (Terms, Privacy) */
+.static-page-header {
+  display: flex;
+  justify-content: space-between; /* Space out title and controls */
+  align-items: center;
+  margin-bottom: 2rem;
+  position: relative; /* For absolute positioning of controls on desktop */
+}
+
+/* Ensure the title container for static pages takes available space */
+.static-page-header .app-title-container {
+  flex-grow: 1;
+  text-align: center; /* Center the static page title */
+}
+
+/* Style for the back to login button */
+.header-btn {
+  background-color: var(--info); /* Use info color for "Back" button */
+  color: white;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  flex-shrink: 0; /* Prevent button from shrinking */
+}
+
+.header-btn:hover {
+  background-color: color-mix(in srgb, var(--info) 80%, black);
+  transform: translateY(-2px);
+}
+
+/* Position header controls for static pages (desktop) */
+.static-page-header .header-controls {
+    display: flex;
+    gap: 0.5rem;
+    position: absolute; /* Position absolutely to not interfere with title centering */
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
 }
 
 
@@ -797,16 +842,6 @@ footer a:hover {
     gap: 0.2rem;
   }
 
-  /* Reset absolute positioning for theme controls on smaller portal screens */
-  body.portal-page .theme-controls {
-    position: static;
-    transform: none;
-    margin-top: 1rem; /* Add some space if stacked */
-    flex-direction: row; /* Keep buttons in a row if space allows */
-    justify-content: center;
-    width: 100%; /* Take full width if not absolute */
-  }
-
   /* New: Force portal page header to stack and center its contents */
   body.portal-page header {
     flex-direction: column; /* Stack title and theme controls */
@@ -825,6 +860,27 @@ footer a:hover {
   /* Adjust theme controls margin when stacked on mobile */
   body.portal-page .theme-controls {
     margin-top: 0.5rem; /* Add a bit of space below the title */
+  }
+
+  /* Static page header controls for mobile: stack and center */
+  .static-page-header {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .static-page-header .header-controls {
+    position: static; /* Remove absolute positioning on mobile */
+    transform: none;
+    margin-top: 1rem; /* Add space between title and buttons */
+    width: 100%;
+    justify-content: center; /* Center buttons horizontally */
+    flex-wrap: wrap; /* Allow buttons to wrap if too many */
+  }
+
+  .static-page-header .header-controls .header-btn {
+    margin-bottom: 0.5rem; /* Space between stacked buttons */
   }
 }
 
