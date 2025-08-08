@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
 
- <!-- FullCalendar CSS -->
+  <!-- FullCalendar CSS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
   <!-- Google Fonts: Inter and Poppins for a modern look -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,10 +51,25 @@
       <p id="auth-status">Not signed in.</p>
     </div>
 
+    <!-- Today's Events Dashboard -->
+    <div id="today-dashboard" class="today-dashboard hidden">
+      <h3>Today's Agenda</h3>
+      <div id="today-events-list">
+        <!-- Events will be dynamically inserted here -->
+      </div>
+      <p id="no-today-events" class="hidden">No events scheduled for today. Enjoy your free time!</p>
+    </div>
+
     <div id="calendar"></div>
     <div id="empty-calendar-message" class="empty-state hidden">
       <p>Looks like your calendar is empty! Click on a date to add your first reminder.</p>
     </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div id="loading-spinner" class="loading-spinner hidden">
+    <div class="spinner"></div>
+    <p>Loading...</p>
   </div>
 
   <!-- Modal for Task Management -->
@@ -77,6 +92,9 @@
         <option value="other">Other</option>
       </select>
 
+      <label for="notes">Notes</label>
+      <textarea id="notes" rows="3" placeholder="Add any additional notes here..."></textarea>
+
       <label for="color-picker">Event Color</label>
       <input type="color" id="color-picker" value="#3498db" />
 
@@ -89,6 +107,15 @@
         <option value="🎂">🎂 Birthday</option>
         <option value="💼">💼 Work</option>
         <option value="💡">💡 Idea</option>
+        <option value="🍔">🍔 Food</option>
+        <option value="🎵">🎵 Music</option>
+        <option value="🎮">🎮 Gaming</option>
+        <option value="🧘">🧘 Wellness</option>
+        <option value="🗓️">🗓️ Appointment</option>
+        <option value="🎉">🎉 Celebration</option>
+        <option value="🚗">🚗 Travel</option>
+        <option value="🏠">🏠 Home</option>
+        <option value="💰">💰 Finance</option>
       </select>
 
       <div class="modal-buttons">

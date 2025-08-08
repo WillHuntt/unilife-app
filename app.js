@@ -75,6 +75,7 @@ let calendar;
 let selectedEvent = null;
 let userId = null;
 let isAuthReady = false;
+let currentEvents = []; // Store the fetched events for the dashboard
 
 // Modal & form elements
 const taskModal = document.getElementById("task-modal");
@@ -83,6 +84,7 @@ const titleInput = document.getElementById("title");
 const startInput = document.getElementById("start");
 const endInput = document.getElementById("end");
 const categoryInput = document.getElementById("category");
+const notesInput = document.getElementById("notes"); // New notes input
 const colorPicker = document.getElementById("color-picker");
 const iconPicker = document.getElementById("icon-picker");
 const deleteBtn = document.getElementById("delete-task-btn");
@@ -103,12 +105,35 @@ const signOutBtnTop = document.getElementById("auth-signout-btn-top");
 const toggleThemeBtn = document.getElementById("toggle-theme");
 const resetThemeBtn = document.getElementById("reset-theme-btn");
 
+// Today Dashboard elements
+const todayDashboard = document.getElementById("today-dashboard");
+const todayEventsList = document.getElementById("today-events-list");
+const noTodayEventsMessage = document.getElementById("no-today-events");
+
+// Loading Spinner element
+const loadingSpinner = document.getElementById("loading-spinner");
+
+
 // Confirmation Modal elements
 const confirmationModal = document.getElementById("confirmation-modal");
 const confirmationMessage = document.getElementById("confirmation-message");
 const confirmYesBtn = document.getElementById("confirm-yes-btn");
 const confirmNoBtn = document.getElementById("confirm-no-btn");
 let onConfirmCallback = null;
+
+// Function to show loading spinner
+function showLoadingSpinner() {
+  if (loadingSpinner) {
+    loadingSpinner.classList.remove("hidden");
+  }
+}
+
+// Function to hide loading spinner
+function hideLoadingSpinner() {
+  if (loadingSpinner) {
+    loadingSpinner.classList.add("hidden");
+  }
+}
 
 // Function to toggle task modal visibility
 function toggleTaskModal(show) {
@@ -120,7 +145,6 @@ function toggleTaskModal(show) {
     colorPicker.value = "#3498db";
     iconPicker.value = "";
   }
-  // No popover to hide here anymore
 }
 
 // Function to toggle confirmation modal visibility
@@ -132,7 +156,6 @@ function showConfirmationDialog(message, onConfirm) {
   if (!taskModal.classList.contains("hidden")) {
     taskModal.classList.add("hidden");
   }
-  // No popover to hide here anymore
 }
 
 function hideConfirmationDialog() {
@@ -159,7 +182,6 @@ if (confirmNoBtn) {
   };
 }
 
-
 // Function to load events from Firebase
 async function loadEvents(fetchInfo, successCallback, failureCallback) {
   if (!isAuthReady || !userId) {
@@ -168,6 +190,8 @@ async function loadEvents(fetchInfo, successCallback, failureCallback) {
     successCallback([]);
     return;
   }
+
+  showLoadingSpinner(); // Show spinner before fetching
 
   try {
     console.log(`Attempting to load events for userId: ${userId}`);
@@ -184,6 +208,7 @@ async function loadEvents(fetchInfo, successCallback, failureCallback) {
         extendedProps: {
           category: data.category,
           originalTitle: data.title,
+          notes: data.notes || '', // Load notes
           color: data.color || null,
           icon: data.icon || null
         },
@@ -193,6 +218,7 @@ async function loadEvents(fetchInfo, successCallback, failureCallback) {
       };
     });
     console.log("Events loaded:", events);
+    currentEvents = events; // Store events for dashboard
 
     if (events.length === 0) {
       emptyCalendarMessage.classList.remove("hidden");
@@ -200,11 +226,14 @@ async function loadEvents(fetchInfo, successCallback, failureCallback) {
       emptyCalendarMessage.classList.add("hidden");
     }
 
+    renderTodayDashboard(); // Render today's events after loading
     successCallback(events);
   } catch (error) {
     console.error("Error loading events:", error);
     failureCallback(error);
     emptyCalendarMessage.classList.remove("hidden");
+  } finally {
+    hideLoadingSpinner(); // Hide spinner after fetching (success or failure)
   }
 }
 
@@ -223,14 +252,16 @@ taskForm.onsubmit = async e => {
     start: startInput.value,
     end: endInput.value,
     category: categoryInput.value,
+    notes: notesInput.value, // Save notes
     color: colorPicker.value,
     icon: iconPicker.value,
     userId: userId
   };
 
+  showLoadingSpinner(); // Show spinner before saving
+
   try {
     if (selectedEvent) {
-      // selectedEvent is correctly available here for update
       await updateDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, selectedEvent.id), eventData);
       console.log("Event updated:", selectedEvent.id);
     } else {
@@ -243,6 +274,8 @@ taskForm.onsubmit = async e => {
   } catch (error) {
     console.error("Error saving event:", error);
     showConfirmationDialog(`Error saving event: ${error.message}`, () => {});
+  } finally {
+    hideLoadingSpinner(); // Hide spinner after saving
   }
 };
 
@@ -253,6 +286,7 @@ async function deleteEvent(eventId) {
     showConfirmationDialog("You must be signed in to delete events.", () => {});
     return;
   }
+  showLoadingSpinner(); // Show spinner before deleting
   try {
     await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, eventId));
     console.log("Event deleted:", eventId);
@@ -260,6 +294,8 @@ async function deleteEvent(eventId) {
   } catch (error) {
     console.error("Error deleting event:", error);
     showConfirmationDialog(`Error deleting event: ${error.message}`, () => {});
+  } finally {
+    hideLoadingSpinner(); // Hide spinner after deleting
   }
 }
 
@@ -341,6 +377,7 @@ if (signUpBtn) {
   signUpBtn.onclick = async () => {
     const email = emailInput.value;
     const password = passwordInput.value;
+    showLoadingSpinner(); // Show spinner
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       console.log("User signed up (Email/Password):", userCredential.user.uid);
@@ -348,6 +385,8 @@ if (signUpBtn) {
     } catch (error) {
       console.error("Error signing up:", error.message);
       showConfirmationDialog(`Sign Up Error: ${error.message}`, () => {});
+    } finally {
+      hideLoadingSpinner(); // Hide spinner
     }
   };
 }
@@ -356,6 +395,7 @@ if (signInBtn) {
   signInBtn.onclick = async () => {
     const email = emailInput.value;
     const password = passwordInput.value;
+    showLoadingSpinner(); // Show spinner
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("User signed in (Email/Password):", userCredential.user.uid);
@@ -363,6 +403,8 @@ if (signInBtn) {
     } catch (error) {
       console.error("Error signing in:", error.message);
       showConfirmationDialog(`Sign In Error: ${error.message}`, () => {});
+    } finally {
+      hideLoadingSpinner(); // Hide spinner
     }
   };
 }
@@ -370,6 +412,7 @@ if (signInBtn) {
 if (googleSignInBtn) {
   googleSignInBtn.onclick = async () => {
     const provider = new GoogleAuthProvider();
+    showLoadingSpinner(); // Show spinner
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
@@ -382,12 +425,15 @@ if (googleSignInBtn) {
         errorMessage = "Google Sign-In popup was closed by the user.";
       }
       showConfirmationDialog(errorMessage, () => {});
+    } finally {
+      hideLoadingSpinner(); // Hide spinner
     }
   };
 }
 
 // Consolidated sign-out function for both buttons
 async function handleSignOut() {
+  showLoadingSpinner(); // Show spinner
   try {
     await signOut(auth);
     console.log("User signed out.");
@@ -395,6 +441,8 @@ async function handleSignOut() {
   } catch (error) {
     console.error("Error signing out:", error.message);
     showConfirmationDialog(`Sign Out Error: ${error.message}`, () => {});
+  } finally {
+    hideLoadingSpinner(); // Hide spinner
   }
 }
 
@@ -402,6 +450,67 @@ async function handleSignOut() {
 if (signOutBtnTop) {
   signOutBtnTop.onclick = handleSignOut;
 }
+
+// --- Today Dashboard Rendering ---
+function renderTodayDashboard() {
+  if (!todayEventsList || !noTodayEventsMessage) {
+    console.warn("Today dashboard elements not found.");
+    return;
+  }
+
+  todayEventsList.innerHTML = ''; // Clear previous events
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize to start of today
+
+  const eventsToday = currentEvents.filter(event => {
+    const eventStart = new Date(event.start);
+    eventStart.setHours(0, 0, 0, 0);
+    return eventStart.getTime() === today.getTime();
+  });
+
+  if (eventsToday.length === 0) {
+    noTodayEventsMessage.classList.remove("hidden");
+    todayDashboard.classList.add("hidden"); // Hide the whole dashboard if no events
+  } else {
+    noTodayEventsMessage.classList.add("hidden");
+    todayDashboard.classList.remove("hidden"); // Show the dashboard
+
+    // Sort events by start time
+    eventsToday.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
+    eventsToday.forEach(event => {
+      const eventItem = document.createElement('div');
+      eventItem.classList.add('today-event-item');
+
+      const startTime = new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const endTime = event.end ? new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'No end';
+
+      eventItem.innerHTML = `
+        <span class="event-time">${startTime} - ${endTime}</span>
+        <div class="event-details">
+          <p class="event-title">${event.extendedProps.icon ? event.extendedProps.icon + ' ' : ''}${event.extendedProps.originalTitle}</p>
+          <p class="event-category">Category: ${event.extendedProps.category}</p>
+          ${event.extendedProps.notes ? `<p class="event-notes">${event.extendedProps.notes}</p>` : ''}
+        </div>
+      `;
+      // Optional: Add a click listener to the dashboard item to open the main modal
+      eventItem.addEventListener('click', () => {
+        selectedEvent = event;
+        titleInput.value = event.extendedProps.originalTitle;
+        startInput.value = event.start.slice(0, 16);
+        endInput.value = event.end?.slice(0, 16) || "";
+        categoryInput.value = event.extendedProps.category;
+        notesInput.value = event.extendedProps.notes || "";
+        colorPicker.value = event.extendedProps.color || "#3498db";
+        iconPicker.value = event.extendedProps.icon || "";
+        toggleTaskModal(true);
+      });
+
+      todayEventsList.appendChild(eventItem);
+    });
+  }
+}
+
 
 // Initialize FullCalendar and Theme when the DOM is loaded
 document.addEventListener("DOMContentLoaded", async () => {
@@ -439,6 +548,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       startInput.value = info.dateStr + "T00:00";
       endInput.value = info.dateStr + "T01:00";
       categoryInput.value = "university"; // Default category
+      notesInput.value = ""; // Clear notes
       colorPicker.value = "#3498db"; // Default color
       iconPicker.value = ""; // No default icon
       toggleTaskModal(true);
@@ -446,10 +556,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     eventClick: info => {
       // Direct editing: When an event is clicked, open the task modal with its details
       selectedEvent = info.event; // Store the clicked event
-      titleInput.value = selectedEvent.extendedProps.originalTitle; // Use original title
+      titleInput.value = selectedEvent.extendedProps.originalTitle;
       startInput.value = selectedEvent.start.toISOString().slice(0, 16);
       endInput.value = selectedEvent.end?.toISOString().slice(0, 16) || "";
       categoryInput.value = selectedEvent.extendedProps.category;
+      notesInput.value = selectedEvent.extendedProps.notes || ""; // Populate notes
       colorPicker.value = selectedEvent.extendedProps.color || "#3498db";
       iconPicker.value = selectedEvent.extendedProps.icon || "";
       toggleTaskModal(true); // Show the modal for editing
@@ -462,16 +573,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         showConfirmationDialog("You must be signed in to move events.", () => {});
         return;
       }
+      showLoadingSpinner(); // Show spinner
       try {
         await updateDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, info.event.id), {
           start: info.event.start.toISOString(),
           end: info.event.end ? info.event.end.toISOString() : null
         });
         console.log("Event updated in Firestore after drop.");
+        calendar.refetchEvents(); // Re-fetch to update dashboard
       } catch (error) {
         console.error("Error updating event on drop:", error);
         info.revert();
         showConfirmationDialog(`Error moving event: ${error.message}`, () => {});
+      } finally {
+        hideLoadingSpinner(); // Hide spinner
       }
     },
     eventResize: async function(info) {
@@ -482,16 +597,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         showConfirmationDialog("You must be signed in to resize events.", () => {});
         return;
       }
+      showLoadingSpinner(); // Show spinner
       try {
         await updateDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, info.event.id), {
           start: info.event.start.toISOString(),
           end: info.event.end ? info.event.end.toISOString() : null
         });
         console.log("Event updated in Firestore after resize.");
+        calendar.refetchEvents(); // Re-fetch to update dashboard
       } catch (error) {
         console.error("Error updating event on resize:", error);
         info.revert();
         showConfirmationDialog(`Error resizing event: ${error.message}`, () => {});
+      } finally {
+        hideLoadingSpinner(); // Hide spinner
       }
     }
   });
@@ -509,11 +628,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Show user info and hide auth forms
       if (userInfoDisplay) {
         userInfoDisplay.classList.remove("hidden");
-        console.log("onAuthStateChanged: userInfoDisplay classList after remove:", userInfoDisplay.classList.value);
       }
       if (authFormsContainer) {
         authFormsContainer.classList.add("hidden");
-        console.log("onAuthStateChanged: authFormsContainer classList after add:", authFormsContainer.classList.value);
       }
 
       displayUserEmail.textContent = user.email || user.displayName || `User ID: ${user.uid}`;
@@ -532,11 +649,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Hide user info and show auth forms
       if (userInfoDisplay) {
         userInfoDisplay.classList.add("hidden");
-        console.log("onAuthStateChanged: userInfoDisplay classList after add:", userInfoDisplay.classList.value);
       }
       if (authFormsContainer) {
         authFormsContainer.classList.remove("hidden");
-        console.log("onAuthStateChanged: authFormsContainer classList after remove:", authFormsContainer.classList.value);
       }
 
       try {

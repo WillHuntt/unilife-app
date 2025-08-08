@@ -250,7 +250,8 @@ header h1 {
 }
 
 .modal input,
-.modal select {
+.modal select,
+.modal textarea { /* Added textarea */
   width: calc(100% - 20px);
   padding: 0.8rem 10px;
   margin-bottom: 1rem;
@@ -272,13 +273,15 @@ header h1 {
 }
 
 .modal input:focus,
-.modal select:focus {
+.modal select:focus,
+.modal textarea:focus { /* Added textarea */
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
-.modal input::placeholder {
+.modal input::placeholder,
+.modal textarea::placeholder { /* Added textarea */
   color: var(--info);
 }
 
@@ -316,7 +319,7 @@ header h1 {
   background-color: color-mix(in srgb, var(--primary) 80%, black);
 }
 
-#delete-task-btn { /* Only for the main modal delete button now */
+#delete-task-btn {
   background-color: var(--danger);
   color: white;
 }
@@ -325,7 +328,7 @@ header h1 {
   background-color: color-mix(in srgb, var(--danger) 80%, black);
 }
 
-#close-modal-btn, #confirm-no-btn { /* Apply cancel style to popover close and confirm no */
+#close-modal-btn, #confirm-no-btn {
   background-color: var(--info);
   color: white;
 }
@@ -491,7 +494,102 @@ header h1 {
 .hidden {
   display: none !important; /* Added !important to ensure hiding */
 }
-/* No event popover styling needed here anymore */
+
+/* Today Dashboard Styles */
+.today-dashboard {
+  background-color: var(--card);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px var(--shadow-light);
+}
+
+.today-dashboard h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.4rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--primary);
+  text-align: center;
+}
+
+.today-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.today-event-item {
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--primary); /* Accent border */
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  box-shadow: 0 2px 5px var(--shadow-light);
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.today-event-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--shadow-dark);
+}
+
+.today-event-item .event-time {
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.today-event-item .event-details {
+  flex-grow: 1;
+}
+
+.today-event-item .event-title {
+  font-weight: 500;
+  color: var(--text);
+  margin: 0;
+}
+
+.today-event-item .event-category {
+  font-size: 0.85rem;
+  color: var(--info);
+  margin: 0;
+}
+
+/* Loading Spinner Styles */
+.loading-spinner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent overlay */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* Above everything else */
+  color: white;
+  font-size: 1.2rem;
+}
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid var(--primary); /* Primary color spinner */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
 
 /* Footer Styling */
@@ -597,7 +695,8 @@ footer a:hover {
   }
 
   .modal input,
-  .modal select {
+  .modal select,
+  .modal textarea {
     padding: 0.6rem 8px;
     font-size: 0.9rem;
   }
