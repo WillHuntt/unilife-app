@@ -20,11 +20,11 @@
   <!-- Custom Styles -->
   <link rel="stylesheet" href="style.css" />
 </head>
-<body data-theme="light" class="static-page-body">
+<body data-theme="light" class="static-page-body portal-page"> <!-- Added portal-page class here -->
   <div class="container static-page-content">
     <header class="static-page-header">
       <div class="app-title-container">
-        <h1>Privacy Policy</h1>
+        <h1>UniLife</h1> <!-- Changed to UniLife for consistency -->
       </div>
       <div class="header-controls">
         <button id="back-to-login-btn" class="header-btn">Back to Login</button>
@@ -124,6 +124,12 @@
         setTheme(getSystemTheme());
       }
     }
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+      if (!localStorage.getItem(THEME_STORAGE_KEY)) {
+        setTheme(event.matches ? 'dark' : 'light');
+      }
+    });
 
     document.addEventListener("DOMContentLoaded", () => {
       initializeTheme();

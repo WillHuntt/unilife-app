@@ -22,13 +22,15 @@
   <!-- Custom Styles (ensure this is loaded last among stylesheets) -->
   <link rel="stylesheet" href="style.css" />
 </head>
-<body data-theme="light">
+<body data-theme="light" class="portal-page"> <!-- Added portal-page class here -->
   <!-- Particle Canvas Background -->
   <canvas id="particle-canvas"></canvas>
 
   <div class="container">
     <header>
-      <h1>UniLife Calendar</h1>
+      <div class="app-title-container"> <!-- New wrapper for app title -->
+        <h1>UniLife</h1> <!-- Changed to UniLife for consistency -->
+      </div>
       <div class="theme-controls">
         <button id="toggle-theme" aria-label="Toggle theme" data-tooltip="Toggle Light/Dark Theme">🌗</button>
         <button id="reset-theme-btn" aria-label="Reset theme to device preference" data-tooltip="Reset to System Theme">🔄</button>
