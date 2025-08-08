@@ -33,7 +33,9 @@ if (typeof __firebase_config !== 'undefined' && __firebase_config) {
 // Crucial check: Ensure apiKey is present before initializing Firebase
 if (!firebaseConfig.apiKey) {
     console.error("Firebase API Key is missing. Please ensure it's provided in firebaseConfig.");
-    alert("Error: Firebase API Key is missing. Please check console for details.");
+    // Using a custom modal/message box instead of alert()
+    const errorMessage = "Error: Firebase API Key is missing. Please check console for details.";
+    showConfirmationDialog(errorMessage, () => {}); // Show error, no action on confirm
     throw new Error("Firebase API Key is missing."); // Stop script execution
 }
 
@@ -88,13 +90,16 @@ const closeModalBtn = document.getElementById("close-modal-btn");
 const emptyCalendarMessage = document.getElementById("empty-calendar-message");
 
 // Authentication UI elements
+const authFormsContainer = document.getElementById("auth-forms-container"); // New container for auth forms
 const emailInput = document.getElementById("auth-email");
 const passwordInput = document.getElementById("auth-password");
 const signUpBtn = document.getElementById("auth-signup-btn");
 const signInBtn = document.getElementById("auth-signin-btn");
 const googleSignInBtn = document.getElementById("google-signin-btn");
-const signOutBtn = document.getElementById("auth-signout-btn");
-const authStatusDiv = document.getElementById("auth-status");
+const userInfoDisplay = document.getElementById("user-info-display"); // New user info div
+const displayUserEmail = document.getElementById("display-user-email"); // Span for user email
+const signOutBtnTop = document.getElementById("auth-signout-btn-top"); // Sign out button at the top
+
 const toggleThemeBtn = document.getElementById("toggle-theme");
 const resetThemeBtn = document.getElementById("reset-theme-btn");
 
@@ -278,6 +283,7 @@ taskForm.onsubmit = async e => {
 
   if (!userId) {
     console.error("User not authenticated. Cannot save event.");
+    showConfirmationDialog("You must be signed in to save events.", () => {});
     return;
   }
 
@@ -304,6 +310,7 @@ taskForm.onsubmit = async e => {
     calendar.refetchEvents();
   } catch (error) {
     console.error("Error saving event:", error);
+    showConfirmationDialog(`Error saving event: ${error.message}`, () => {});
   }
 };
 
@@ -311,6 +318,7 @@ taskForm.onsubmit = async e => {
 async function deleteEvent(eventId) {
   if (!userId) {
     console.error("User not authenticated. Cannot delete event.");
+    showConfirmationDialog("You must be signed in to delete events.", () => {});
     return;
   }
   try {
@@ -319,6 +327,7 @@ async function deleteEvent(eventId) {
     calendar.refetchEvents();
   } catch (error) {
     console.error("Error deleting event:", error);
+    showConfirmationDialog(`Error deleting event: ${error.message}`, () => {});
   }
 }
 
@@ -403,9 +412,10 @@ if (signUpBtn) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       console.log("User signed up (Email/Password):", userCredential.user.uid);
+      // UI update handled by onAuthStateChanged
     } catch (error) {
       console.error("Error signing up:", error.message);
-      authStatusDiv.textContent = `Sign Up Error: ${error.message}`;
+      showConfirmationDialog(`Sign Up Error: ${error.message}`, () => {});
     }
   };
 }
@@ -417,9 +427,10 @@ if (signInBtn) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("User signed in (Email/Password):", userCredential.user.uid);
+      // UI update handled by onAuthStateChanged
     } catch (error) {
       console.error("Error signing in:", error.message);
-      authStatusDiv.textContent = `Sign In Error: ${error.message}`;
+      showConfirmationDialog(`Sign In Error: ${error.message}`, () => {});
     }
   };
 }
@@ -429,39 +440,38 @@ if (googleSignInBtn) {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential.accessToken;
+      // const credential = GoogleAuthProvider.credentialFromResult(result); // Not directly used for UI
       const user = result.user;
       console.log("User signed in with Google:", user.uid, user.displayName);
+      // UI update handled by onAuthStateChanged
     } catch (error) {
       console.error("Error during Google Sign-In:", error.code, error.message);
-      authStatusDiv.textContent = `Google Sign-In Error: ${error.message}`;
+      let errorMessage = `Google Sign-In Error: ${error.message}`;
       if (error.code === 'auth/popup-closed-by-user') {
-        console.log("Google Sign-In popup was closed by the user.");
+        errorMessage = "Google Sign-In popup was closed by the user.";
       }
+      showConfirmationDialog(errorMessage, () => {});
     }
   };
 }
 
-if (signOutBtn) {
-  signOutBtn.onclick = async () => {
-    try {
-      await signOut(auth);
-      console.log("User signed out.");
-      userId = null;
-      isAuthReady = false;
-      calendar.refetchEvents();
-      authStatusDiv.textContent = "Not signed in.";
-      emailInput.value = "";
-      passwordInput.value = "";
-      localStorage.removeItem(THEME_STORAGE_KEY);
-      setTheme(getSystemTheme());
-    } catch (error) {
-      console.error("Error signing out:", error.message);
-      authStatusDiv.textContent = `Sign Out Error: ${error.message}`;
-    }
-  };
+// Consolidated sign-out function for both buttons
+async function handleSignOut() {
+  try {
+    await signOut(auth);
+    console.log("User signed out.");
+    // UI update handled by onAuthStateChanged
+  } catch (error) {
+    console.error("Error signing out:", error.message);
+    showConfirmationDialog(`Sign Out Error: ${error.message}`, () => {});
+  }
 }
+
+// Attach sign-out handler to both potential buttons
+if (signOutBtnTop) {
+  signOutBtnTop.onclick = handleSignOut;
+}
+// Note: The old #auth-signout-btn is removed from HTML, so no need to attach listener to it.
 
 // Initialize FullCalendar and Theme when the DOM is loaded
 document.addEventListener("DOMContentLoaded", async () => {
@@ -490,6 +500,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     },
     dateClick: info => {
       console.log("Date clicked:", info.dateStr);
+      if (!userId) {
+        showConfirmationDialog("Please sign in to add events.", () => {});
+        return;
+      }
       selectedEvent = null; // Ensure no event is pre-selected for new entry
       titleInput.value = ""; // Clear title
       startInput.value = info.dateStr + "T00:00";
@@ -512,6 +526,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!userId) {
         console.error("User not authenticated. Cannot update event on drop.");
         info.revert();
+        showConfirmationDialog("You must be signed in to move events.", () => {});
         return;
       }
       try {
@@ -523,6 +538,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       } catch (error) {
         console.error("Error updating event on drop:", error);
         info.revert();
+        showConfirmationDialog(`Error moving event: ${error.message}`, () => {});
       }
     },
     eventResize: async function(info) {
@@ -530,6 +546,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!userId) {
         console.error("User not authenticated. Cannot update event on resize.");
         info.revert();
+        showConfirmationDialog("You must be signed in to resize events.", () => {});
         return;
       }
       try {
@@ -541,6 +558,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       } catch (error) {
         console.error("Error updating event on resize:", error);
         info.revert();
+        showConfirmationDialog(`Error resizing event: ${error.message}`, () => {});
       }
     }
   });
@@ -553,22 +571,49 @@ document.addEventListener("DOMContentLoaded", async () => {
       userId = user.uid;
       isAuthReady = true;
       console.log("User authenticated:", userId);
-      authStatusDiv.textContent = `Signed in as: ${user.email || user.displayName || user.uid}`;
+
+      // Show user info and hide auth forms
+      userInfoDisplay.classList.remove("hidden");
+      authFormsContainer.classList.add("hidden");
+
+      // Display user email or UID
+      displayUserEmail.textContent = user.email || user.displayName || `User ID: ${user.uid}`;
+
+      // Clear email/password inputs
+      emailInput.value = "";
+      passwordInput.value = "";
+
       calendar.refetchEvents();
     } else {
+      // User is signed out
+      userId = null;
+      isAuthReady = false;
+      console.log("No user signed in.");
+
+      // Hide user info and show auth forms
+      userInfoDisplay.classList.add("hidden");
+      authFormsContainer.classList.remove("hidden");
+
+      // Attempt anonymous sign-in if not already
       try {
-        console.log("No user signed in. Attempting anonymous sign-in...");
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
-          console.log("Signed in with custom token.");
+          userId = auth.currentUser.uid; // Get UID from newly signed-in anonymous user
+          isAuthReady = true;
+          console.log("Signed in with custom token (anonymous):", userId);
+          // UI will update on next onAuthStateChanged trigger
         } else {
           await signInAnonymously(auth);
-          console.log("Signed in anonymously.");
+          userId = auth.currentUser.uid; // Get UID from newly signed-in anonymous user
+          isAuthReady = true;
+          console.log("Signed in anonymously:", userId);
+          // UI will update on next onAuthStateChanged trigger
         }
       } catch (error) {
-        console.error("Error during initial authentication:", error);
-        authStatusDiv.textContent = "Authentication failed. Please check console.";
+        console.error("Error during initial authentication (anonymous sign-in):", error);
+        showConfirmationDialog("Authentication failed. Please check console.", () => {});
       }
+      calendar.refetchEvents(); // Refetch events (will be empty if not authenticated)
     }
   });
 });

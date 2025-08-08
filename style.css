@@ -366,8 +366,8 @@ header h1 {
   border-width: 0;
 }
 
-/* Authentication Section Styling */
-.auth-section {
+/* Authentication Section Styling (for sign-in/sign-up forms) */
+#auth-forms-container {
   background-color: var(--card);
   border-radius: 12px;
   padding: 1.5rem;
@@ -376,14 +376,14 @@ header h1 {
   text-align: center;
 }
 
-.auth-section h2 {
+#auth-forms-container h2 {
   font-family: 'Poppins', sans-serif;
   font-size: 1.5rem;
   margin-bottom: 1rem;
   color: var(--text);
 }
 
-.auth-section input {
+#auth-forms-container input {
   width: calc(100% - 20px);
   padding: 0.8rem 10px;
   margin-bottom: 0.8rem;
@@ -399,6 +399,7 @@ header h1 {
   justify-content: center;
   gap: 0.8rem;
   margin-top: 1rem;
+  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
 }
 
 .auth-buttons button {
@@ -410,19 +411,13 @@ header h1 {
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.1s ease;
+  flex-grow: 1; /* Allow buttons to grow */
+  min-width: 120px; /* Ensure buttons don't get too small */
 }
 
 .auth-buttons button:hover {
   background-color: color-mix(in srgb, var(--primary) 80%, black);
   transform: translateY(-2px);
-}
-
-#auth-signout-btn {
-  background-color: var(--info);
-}
-
-#auth-signout-btn:hover {
-  background-color: color-mix(in srgb, var(--info) 80%, black);
 }
 
 /* Google Sign-In Button Specific Style */
@@ -433,12 +428,51 @@ header h1 {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.8rem 1.2rem;
 }
 
 .google-btn:hover {
   background-color: var(--google-blue-dark) !important;
 }
+
+/* User Info Display Styling (new section at the top) */
+.user-info-display {
+  background-color: var(--card);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem; /* Space between user info and calendar */
+  box-shadow: 0 4px 15px var(--shadow-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem; /* Space between text and button */
+  flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+
+.user-info-display p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text);
+  font-weight: 500;
+  flex-grow: 1; /* Allow text to take available space */
+}
+
+.user-info-display .signout-btn {
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--info);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  flex-shrink: 0; /* Prevent button from shrinking */
+}
+
+.user-info-display .signout-btn:hover {
+  background-color: color-mix(in srgb, var(--info) 80%, black);
+  transform: translateY(-2px);
+}
+
 
 /* Empty State Message */
 .empty-state {
@@ -573,6 +607,17 @@ footer a:hover {
   .theme-controls {
     flex-direction: column;
     gap: 0.2rem;
+  }
+
+  .user-info-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .user-info-display p {
+    text-align: center;
+    width: 100%;
   }
 
   .event-popover {
