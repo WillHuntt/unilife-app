@@ -4,47 +4,55 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reminder Calendar</title>
+  <!-- FullCalendar CSS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+  <!-- Google Fonts: Inter and Poppins for a modern look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom Styles -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body data-theme="light">
   <div class="container">
     <header>
       <h1>My Reminder Calendar</h1>
-      <button id="toggle-theme">🌗</button>
+      <button id="toggle-theme" aria-label="Toggle theme">🌗</button>
     </header>
     <div id="calendar"></div>
   </div>
 
-  <!-- Modal -->
-  <div id="task-modal" class="modal hidden">
+  <!-- Modal for Task Management -->
+  <div id="task-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <form id="task-form">
+      <h2 id="modal-title" class="sr-only">Task Details</h2>
       <label for="title">Title</label>
-      <input type="text" id="title" required />
+      <input type="text" id="title" required aria-required="true" placeholder="e.g., Team Meeting" />
 
       <label for="start">Start</label>
-      <input type="datetime-local" id="start" required />
+      <input type="datetime-local" id="start" required aria-required="true" />
 
       <label for="end">End</label>
-      <input type="datetime-local" id="end" required />
+      <input type="datetime-local" id="end" required aria-required="true" />
 
       <label for="category">Category</label>
-      <select id="category" required>
+      <select id="category" required aria-required="true">
         <option value="university">University</option>
         <option value="fitness">Fitness</option>
         <option value="other">Other</option>
       </select>
 
       <div class="modal-buttons">
-        <button type="submit">Save</button>
-        <button type="button" id="delete-task-btn">Delete</button>
-        <button type="button" id="close-modal-btn">Cancel</button>
+        <button type="submit" class="save-btn">Save</button>
+        <button type="button" id="delete-task-btn" class="delete-btn">Delete</button>
+        <button type="button" id="close-modal-btn" class="cancel-btn">Cancel</button>
       </div>
     </form>
   </div>
 
-  <!-- Scripts -->
+  <!-- FullCalendar JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <!-- Your application's JavaScript -->
   <script type="module" src="app.js"></script>
 </body>
 </html>

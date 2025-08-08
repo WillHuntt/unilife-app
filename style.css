@@ -1,161 +1,345 @@
+/* Root variables for light and dark themes */
 :root {
-  --bg: #ffffff;
-  --text: #111111;
-  --card: #f3f3f3;
-  --university: #007bff;
-  --fitness: #28a745;
-  --other: #ff9800;
+  --bg: #f8f9fa; /* Light background */
+  --text: #212529; /* Dark text */
+  --card: #ffffff; /* Card background */
+  --border: #dee2e6; /* Light border */
+  --primary: #007bff; /* Primary blue for university */
+  --secondary: #28a745; /* Secondary green for fitness */
+  --accent: #ffc107; /* Accent yellow for other */
+  --danger: #dc3545; /* Red for delete */
+  --info: #6c757d; /* Grey for cancel */
+  --shadow-light: rgba(0, 0, 0, 0.08);
+  --shadow-dark: rgba(0, 0, 0, 0.25);
 }
 
+/* Dark theme variables */
 [data-theme="dark"] {
-  --bg: #121212;
-  --text: #eeeeee;
-  --card: #1e1e1e;
+  --bg: #1a1a1a;
+  --text: #e0e0e0;
+  --card: #2c2c2c;
+  --border: #444444;
+  --primary: #66b3ff; /* Lighter blue for dark theme */
+  --secondary: #66cc80; /* Lighter green for dark theme */
+  --accent: #ffda66; /* Lighter yellow for dark theme */
+  --danger: #ff6b6b;
+  --info: #a0a0a0;
 }
 
+/* Base styles */
 body {
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Inter', sans-serif; /* Modern sans-serif font */
   background-color: var(--bg);
   color: var(--text);
   margin: 0;
   padding: 0;
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth theme transition */
 }
 
 .container {
-  max-width: 700px;
+  max-width: 900px; /* Increased max-width for better calendar display */
   margin: 2rem auto;
-  padding: 1rem;
+  padding: 1.5rem; /* Increased padding */
 }
 
+/* Header styling */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem; /* Increased margin */
 }
 
+header h1 {
+  font-family: 'Poppins', sans-serif; /* Distinct font for heading */
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Theme toggle button */
+#toggle-theme {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50%; /* Circular button */
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 2px 5px var(--shadow-light);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#toggle-theme:hover {
+  background-color: var(--border);
+  box-shadow: 0 4px 8px var(--shadow-dark);
+}
+
+/* Calendar container */
 #calendar {
   background-color: var(--card);
-  border-radius: 8px;
-  padding: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px; /* More rounded corners */
+  padding: 1rem; /* Increased padding */
+  box-shadow: 0 4px 15px var(--shadow-light); /* Softer, larger shadow */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* FullCalendar specific overrides */
+.fc .fc-toolbar-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.8rem; /* Slightly larger title */
+  font-weight: 600;
+  color: var(--text);
+}
+
+.fc-button {
+  font-size: 0.9rem !important;
+  padding: 0.6rem 1rem !important; /* Larger buttons */
+  border-radius: 8px !important; /* More rounded buttons */
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: white !important;
+  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fc-button:hover {
+  background-color: #0056b3 !important; /* Darker blue on hover */
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+.fc-button-active {
+  background-color: #0056b3 !important;
+  border-color: #0056b3 !important;
+}
+
+/* Calendar day cells */
+.fc-daygrid-day {
+  border-radius: 6px; /* Slightly rounded day cells */
+  transition: background-color 0.1s ease;
+}
+
+.fc-daygrid-day:hover {
+  background-color: var(--border); /* Subtle hover effect on days */
+}
+
+/* Modal styling */
 .modal {
   position: fixed;
   top: 50%;
   left: 50%;
   background: var(--card);
-  border-radius: 8px;
-  padding: 1rem;
-  width: 300px;
+  border-radius: 12px;
+  padding: 2rem; /* More padding */
+  width: 90%; /* Responsive width */
+  max-width: 450px; /* Max width for larger screens */
   transform: translate(-50%, -50%);
   z-index: 1001;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 20px var(--shadow-dark); /* Stronger shadow */
+  display: flex; /* Use flex for centering content */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0; /* Start hidden for animation */
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.hidden {
-  display: none;
+.modal.hidden {
+  opacity: 0;
+  visibility: hidden;
 }
 
+.modal:not(.hidden) {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Form elements within modal */
 .modal label {
   display: block;
-  margin: 0.5rem 0 0.25rem 0;
+  margin: 0.8rem 0 0.4rem 0; /* More spacing */
+  font-weight: 500;
+  color: var(--text);
 }
 
 .modal input,
 .modal select {
-  width: 100%;
-  padding: 0.4rem;
-  margin-bottom: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  width: calc(100% - 20px); /* Adjust width for padding */
+  padding: 0.8rem 10px; /* More padding */
+  margin-bottom: 1rem; /* More spacing */
+  border-radius: 8px; /* More rounded */
+  border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.modal input:focus,
+.modal select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.modal input::placeholder {
+  color: #a0a0a0;
+}
+
+/* Modal buttons */
 .modal-buttons {
   display: flex;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.8rem; /* Increased gap */
+  margin-top: 1.5rem; /* More spacing above buttons */
+  width: 100%;
 }
 
 .modal-buttons button {
   flex: 1;
-  padding: 0.5rem;
+  padding: 0.8rem 1rem; /* Larger padding for touch targets */
   cursor: pointer;
   border: none;
-  border-radius: 6px;
-  font-weight: bold;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
 }
 
-.modal-buttons button[type="submit"] {
-  background-color: var(--university);
+.modal-buttons button:hover {
+  transform: translateY(-2px); /* Lift effect on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.modal-buttons .save-btn {
+  background-color: var(--primary);
   color: white;
+}
+
+.modal-buttons .save-btn:hover {
+  background-color: #0056b3;
 }
 
 #delete-task-btn {
-  background-color: #d9534f;
+  background-color: var(--danger);
   color: white;
+}
+
+#delete-task-btn:hover {
+  background-color: #c82333;
 }
 
 #close-modal-btn {
-  background-color: #6c757d;
+  background-color: var(--info);
   color: white;
 }
 
+#close-modal-btn:hover {
+  background-color: #545b62;
+}
+
+/* Event category colors */
 .fc-event-university {
-  background-color: var(--university) !important;
-  border-color: var(--university) !important;
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: white !important;
 }
 
 .fc-event-fitness {
-  background-color: var(--fitness) !important;
-  border-color: var(--fitness) !important;
+  background-color: var(--secondary) !important;
+  border-color: var(--secondary) !important;
+  color: white !important;
 }
 
 .fc-event-other {
-  background-color: var(--other) !important;
-  border-color: var(--other) !important;
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: var(--text) !important; /* Ensure text is readable on yellow */
 }
 
-.fc .fc-toolbar-title {
-  font-size: 1.5rem;
+/* Accessibility: Visually hidden text for screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
-.fc-button {
-  font-size: 0.85rem !important;
-  padding: 0.4rem 0.6rem !important;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    margin: 1rem auto;
+    padding: 1rem;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 1.5rem;
+  }
+
+  .modal {
+    padding: 1.5rem;
+  }
+
+  .modal-buttons {
+    flex-direction: column; /* Stack buttons on small screens */
+  }
+
+  .modal-buttons button {
+    width: 100%;
+    margin-bottom: 0.5rem; /* Space between stacked buttons */
+  }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 480px) {
   .container {
     padding: 0.5rem;
   }
 
-  .modal {
-    width: 90%;
+  header h1 {
+    font-size: 1.2rem;
   }
 
-  #calendar {
-    font-size: 0.8rem;
-    padding: 0.25rem;
+  #toggle-theme {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
   }
 
   .fc .fc-toolbar-title {
     font-size: 1.2rem;
   }
 
-  .fc-daygrid-event {
-    font-size: 0.7rem;
-    padding: 2px 4px;
+  .fc-button {
+    font-size: 0.8rem !important;
+    padding: 0.5rem 0.8rem !important;
   }
 
-  .modal-buttons {
-    flex-direction: column;
+  .modal {
+    padding: 1rem;
+  }
+
+  .modal input,
+  .modal select {
+    padding: 0.6rem 8px;
+    font-size: 0.9rem;
   }
 
   .modal-buttons button {
-    width: 100%;
+    padding: 0.6rem;
+    font-size: 0.9rem;
   }
 }
