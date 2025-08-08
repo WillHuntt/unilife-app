@@ -57,12 +57,14 @@ body {
   flex-direction: column; /* Stack content vertically */
   min-height: 100vh; /* Ensure body takes full viewport height */
   position: relative; /* Needed for positioning canvas */
-  overflow: hidden; /* Hide any potential canvas overflow */
+  /* --- IMPORTANT CHANGE: Allow vertical scrolling --- */
+  overflow-x: hidden; /* Prevent horizontal scrollbar from canvas */
+  overflow-y: auto;   /* Allow vertical scrolling for main content */
 }
 
 /* Particle Canvas Styling */
 #particle-canvas {
-  position: absolute;
+  position: fixed; /* Changed from absolute to fixed to ensure it covers the whole viewport even if body scrolls */
   top: 0;
   left: 0;
   width: 100%;
@@ -100,13 +102,13 @@ header h1 {
   font-weight: 700; /* Bolder for UniLife */
   color: var(--text);
   margin: 0;
-  /* Animation only applies to portal page for now, general h1 won't pulse */
 }
 
 /* Specific styling for the portal page header to ensure title is truly central */
 body.portal-page header {
   justify-content: center; /* Center the main content (title container) */
   position: relative; /* Needed for absolute positioning of theme controls */
+  margin-bottom: 1rem; /* Slightly reduced margin for more compact portal page */
 }
 
 body.portal-page .app-title-container {
@@ -116,7 +118,7 @@ body.portal-page .app-title-container {
 
 /* Increase font size for UniLife on portal page and apply pulse animation */
 body.portal-page header h1 {
-  font-size: 3rem; /* Larger on desktop */
+  font-size: 3.5rem; /* Larger on desktop */
   animation: pulse 2s infinite alternate; /* Apply animation here */
 }
 
@@ -697,6 +699,17 @@ footer a:hover {
   text-decoration: underline;
 }
 
+/* New: Styling for legal links in the footer */
+.legal-links {
+  margin-top: 0.5rem; /* Space above legal links */
+  font-size: 0.8rem; /* Slightly smaller for legal text */
+}
+
+.legal-links a {
+  margin: 0 0.5rem; /* Space between legal links */
+  white-space: nowrap; /* Prevent links from breaking across lines */
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -705,8 +718,14 @@ footer a:hover {
     padding: 1rem;
   }
 
+  /* Reduce font size of header h1 on smaller screens for calendar page */
   header h1 {
     font-size: 1.5rem;
+  }
+
+  /* Also apply this for portal page's h1 specifically on small screens */
+  body.portal-page header h1 {
+    font-size: 2.2rem; /* Adjusted for smaller screens on portal page */
   }
 
   .fc .fc-toolbar-title {
@@ -735,6 +754,16 @@ footer a:hover {
     gap: 0.2rem;
   }
 
+  /* Reset absolute positioning for theme controls on smaller portal screens */
+  body.portal-page .theme-controls {
+    position: static;
+    transform: none;
+    margin-top: 1rem; /* Add some space if stacked */
+    flex-direction: row; /* Keep buttons in a row if space allows */
+    justify-content: center;
+    width: 100%; /* Take full width if not absolute */
+  }
+
   .user-info-display {
     flex-direction: column;
     align-items: flex-start;
@@ -752,8 +781,13 @@ footer a:hover {
     padding: 0.5rem;
   }
 
+  /* Further reduce font size for smaller screens */
   header h1 {
     font-size: 1.2rem;
+  }
+
+  body.portal-page header h1 {
+    font-size: 2rem; /* Adjusted for very small screens on portal page */
   }
 
   #toggle-theme, #reset-theme-btn {
@@ -763,6 +797,10 @@ footer a:hover {
   }
 
   .fc .fc-toolbar-title {
+    font-size: 1.2rem;
+  }
+
+  .fc-button {
     font-size: 0.8rem !important;
     padding: 0.5rem 0.8rem !important;
   }
