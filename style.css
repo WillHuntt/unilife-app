@@ -316,21 +316,21 @@ header h1 {
   background-color: color-mix(in srgb, var(--primary) 80%, black);
 }
 
-#delete-task-btn, #popover-delete-btn { /* Apply delete style to popover delete button too */
+#delete-task-btn { /* Only for the main modal delete button now */
   background-color: var(--danger);
   color: white;
 }
 
-#delete-task-btn:hover, #popover-delete-btn:hover {
+#delete-task-btn:hover {
   background-color: color-mix(in srgb, var(--danger) 80%, black);
 }
 
-#close-modal-btn, #popover-close-btn, #confirm-no-btn { /* Apply cancel style to popover close and confirm no */
+#close-modal-btn, #confirm-no-btn { /* Apply cancel style to popover close and confirm no */
   background-color: var(--info);
   color: white;
 }
 
-#close-modal-btn:hover, #popover-close-btn:hover, #confirm-no-btn:hover {
+#close-modal-btn:hover, #confirm-no-btn:hover {
   background-color: color-mix(in srgb, var(--info) 80%, black);
 }
 
@@ -491,62 +491,8 @@ header h1 {
 .hidden {
   display: none !important; /* Added !important to ensure hiding */
 }
+/* No event popover styling needed here anymore */
 
-/* Event Popover Styling */
-.event-popover {
-  position: absolute; /* Positioned relative to the event */
-  background-color: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 4px 12px var(--shadow-dark);
-  z-index: 1000;
-  min-width: 200px;
-  max-width: 300px;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
-}
-
-.event-popover h3 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-  color: var(--primary); /* Use primary color for title */
-  font-family: 'Poppins', sans-serif;
-}
-
-.event-popover p {
-  margin-bottom: 0.3rem;
-  font-size: 0.95rem;
-  color: var(--text);
-}
-
-.event-popover .popover-buttons {
-  display: flex; /* Ensure buttons are laid out in a row */
-  gap: 0.5rem;
-  margin-top: 1rem;
-  justify-content: space-between;
-}
-
-.event-popover .popover-btn {
-  padding: 0.6rem 0.8rem;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  flex: 1;
-}
-
-.event-popover .popover-btn.edit-btn {
-  background-color: var(--primary);
-  color: white;
-}
-
-.event-popover .popover-btn.edit-btn:hover {
-  background-color: color-mix(in srgb, var(--primary) 80%, black);
-}
 
 /* Footer Styling */
 footer {
@@ -619,10 +565,6 @@ footer a:hover {
   .user-info-display p {
     text-align: center;
     width: 100%;
-  }
-
-  .event-popover {
-    max-width: 90%; /* Allow popover to be wider on small screens */
   }
 }
 

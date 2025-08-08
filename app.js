@@ -103,15 +103,6 @@ const signOutBtnTop = document.getElementById("auth-signout-btn-top");
 const toggleThemeBtn = document.getElementById("toggle-theme");
 const resetThemeBtn = document.getElementById("reset-theme-btn");
 
-// Event Popover elements
-const eventPopover = document.getElementById("event-popover");
-const popoverTitle = document.getElementById("popover-title");
-const popoverTime = document.getElementById("popover-time");
-const popoverCategory = document.getElementById("popover-category");
-const popoverEditBtn = document.getElementById("popover-edit-btn");
-const popoverDeleteBtn = document.getElementById("popover-delete-btn");
-const popoverCloseBtn = document.getElementById("popover-close-btn");
-
 // Confirmation Modal elements
 const confirmationModal = document.getElementById("confirmation-modal");
 const confirmationMessage = document.getElementById("confirmation-message");
@@ -125,12 +116,11 @@ function toggleTaskModal(show) {
   if (!show) {
     // ONLY reset form and selectedEvent when closing the modal
     taskForm.reset();
-    selectedEvent = null; // This is the fix for editing: only nullify on close
+    selectedEvent = null; // Reset selectedEvent when closing the modal
     colorPicker.value = "#3498db";
     iconPicker.value = "";
   }
-  // Always hide popover when task modal is toggled (opened or closed)
-  hidePopover();
+  // No popover to hide here anymore
 }
 
 // Function to toggle confirmation modal visibility
@@ -142,7 +132,7 @@ function showConfirmationDialog(message, onConfirm) {
   if (!taskModal.classList.contains("hidden")) {
     taskModal.classList.add("hidden");
   }
-  hidePopover(); // Hide popover if it's open
+  // No popover to hide here anymore
 }
 
 function hideConfirmationDialog() {
@@ -168,68 +158,6 @@ if (confirmNoBtn) {
     hideConfirmationDialog();
   };
 }
-
-
-// Function to show event popover
-function showPopover(event, jsEvent) {
-  selectedEvent = event; // Set selected event for popover actions
-  popoverTitle.textContent = event.extendedProps.originalTitle;
-  popoverTime.textContent = `${event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${event.end ? event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'No end time'}`;
-  popoverCategory.textContent = `Category: ${event.extendedProps.category}`;
-
-  // Position the popover near the clicked event
-  const rect = jsEvent.target.getBoundingClientRect();
-  eventPopover.style.top = `${rect.bottom + window.scrollY + 10}px`;
-  eventPopover.style.left = `${rect.left + window.scrollX}px`;
-  eventPopover.classList.remove("hidden");
-}
-
-// Function to hide event popover
-function hidePopover() {
-  eventPopover.classList.add("hidden");
-  // IMPORTANT: Do NOT nullify selectedEvent here.
-  // selectedEvent should only be nulled when the task modal is closed.
-}
-
-// Popover button handlers
-if (popoverEditBtn) {
-  popoverEditBtn.onclick = () => {
-    if (selectedEvent) {
-      titleInput.value = selectedEvent.extendedProps.originalTitle;
-      startInput.value = selectedEvent.start.toISOString().slice(0, 16);
-      endInput.value = selectedEvent.end?.toISOString().slice(0, 16) || "";
-      categoryInput.value = selectedEvent.extendedProps.category;
-      colorPicker.value = selectedEvent.extendedProps.color || "#3498db";
-      iconPicker.value = selectedEvent.extendedProps.icon || "";
-      toggleTaskModal(true); // Open the main task modal for editing. This will also hide the popover.
-      // selectedEvent remains set here for the form submission.
-    }
-  };
-}
-
-if (popoverDeleteBtn) {
-  popoverDeleteBtn.onclick = () => {
-    showConfirmationDialog("Are you sure you want to delete this event?", async (confirmed) => {
-      if (confirmed && selectedEvent) {
-        await deleteEvent(selectedEvent.id); // Call delete function
-      }
-      hidePopover(); // Hide popover after confirmation dialog
-    });
-  };
-}
-
-if (popoverCloseBtn) {
-  popoverCloseBtn.onclick = () => hidePopover();
-}
-
-// Close popover if clicking outside it
-document.addEventListener('click', (e) => {
-  if (!eventPopover.classList.contains('hidden') &&
-      !eventPopover.contains(e.target) &&
-      !e.target.closest('.fc-event')) { // Don't hide if clicking on another event
-    hidePopover();
-  }
-});
 
 
 // Function to load events from Firebase
@@ -302,7 +230,7 @@ taskForm.onsubmit = async e => {
 
   try {
     if (selectedEvent) {
-      // selectedEvent is correctly available here because hidePopover() no longer nulls it
+      // selectedEvent is correctly available here for update
       await updateDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, selectedEvent.id), eventData);
       console.log("Event updated:", selectedEvent.id);
     } else {
@@ -335,7 +263,7 @@ async function deleteEvent(eventId) {
   }
 }
 
-// Original delete button handler (now uses confirmation dialog)
+// Delete button handler for the task modal
 if (deleteBtn) {
   deleteBtn.onclick = () => {
     if (selectedEvent) {
@@ -516,12 +444,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       toggleTaskModal(true);
     },
     eventClick: info => {
-      // Hide popover if another event is clicked
-      if (selectedEvent && selectedEvent.id === info.event.id) {
-        hidePopover(); // Clicked same event, hide popover
-      } else {
-        showPopover(info.event, info.jsEvent); // Show popover for this event
-      }
+      // Direct editing: When an event is clicked, open the task modal with its details
+      selectedEvent = info.event; // Store the clicked event
+      titleInput.value = selectedEvent.extendedProps.originalTitle; // Use original title
+      startInput.value = selectedEvent.start.toISOString().slice(0, 16);
+      endInput.value = selectedEvent.end?.toISOString().slice(0, 16) || "";
+      categoryInput.value = selectedEvent.extendedProps.category;
+      colorPicker.value = selectedEvent.extendedProps.color || "#3498db";
+      iconPicker.value = selectedEvent.extendedProps.icon || "";
+      toggleTaskModal(true); // Show the modal for editing
     },
     eventDrop: async function(info) {
       console.log("Event dropped:", info.event.id, info.event.start, info.event.end);
