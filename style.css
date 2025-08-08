@@ -488,7 +488,7 @@ header h1 {
 }
 
 .empty-state.hidden {
-  display: none;
+  display: none !important; /* Added !important to ensure hiding */
 }
 
 /* Event Popover Styling */

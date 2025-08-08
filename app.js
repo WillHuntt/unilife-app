@@ -467,11 +467,10 @@ async function handleSignOut() {
   }
 }
 
-// Attach sign-out handler to both potential buttons
+// Attach sign-out handler to the top sign-out button
 if (signOutBtnTop) {
   signOutBtnTop.onclick = handleSignOut;
 }
-// Note: The old #auth-signout-btn is removed from HTML, so no need to attach listener to it.
 
 // Initialize FullCalendar and Theme when the DOM is loaded
 document.addEventListener("DOMContentLoaded", async () => {
@@ -579,7 +578,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Display user email or UID
       displayUserEmail.textContent = user.email || user.displayName || `User ID: ${user.uid}`;
 
-      // Clear email/password inputs
+      // Clear email/password inputs (important if they were partially filled before login)
       emailInput.value = "";
       passwordInput.value = "";
 
@@ -598,16 +597,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       try {
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
-          userId = auth.currentUser.uid; // Get UID from newly signed-in anonymous user
-          isAuthReady = true;
-          console.log("Signed in with custom token (anonymous):", userId);
-          // UI will update on next onAuthStateChanged trigger
+          // The onAuthStateChanged listener will fire again with the anonymous user
         } else {
           await signInAnonymously(auth);
-          userId = auth.currentUser.uid; // Get UID from newly signed-in anonymous user
-          isAuthReady = true;
-          console.log("Signed in anonymously:", userId);
-          // UI will update on next onAuthStateChanged trigger
+          // The onAuthStateChanged listener will fire again with the anonymous user
         }
       } catch (error) {
         console.error("Error during initial authentication (anonymous sign-in):", error);
