@@ -11,6 +11,8 @@
   --info: #6c757d; /* Grey for cancel */
   --shadow-light: rgba(0, 0, 0, 0.08);
   --shadow-dark: rgba(0, 0, 0, 0.25);
+  --google-blue: #4285f4; /* Google brand blue */
+  --google-blue-dark: #3367d6; /* Darker Google blue for hover */
 }
 
 /* Dark theme variables */
@@ -275,6 +277,80 @@ header h1 {
   border-width: 0;
 }
 
+/* Authentication Section Styling */
+.auth-section {
+  background-color: var(--card);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px var(--shadow-light);
+  text-align: center;
+}
+
+.auth-section h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.auth-section input {
+  width: calc(100% - 20px);
+  padding: 0.8rem 10px;
+  margin-bottom: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.auth-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.auth-buttons button {
+  padding: 0.8rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--primary);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.auth-buttons button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+#auth-signout-btn {
+  background-color: var(--info);
+}
+
+#auth-signout-btn:hover {
+  background-color: #545b62;
+}
+
+/* Google Sign-In Button Specific Style */
+.google-btn {
+  background-color: var(--google-blue) !important;
+  color: white !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.2rem; /* Ensure consistent padding */
+}
+
+.google-btn:hover {
+  background-color: var(--google-blue-dark) !important;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .container {
@@ -301,6 +377,10 @@ header h1 {
   .modal-buttons button {
     width: 100%;
     margin-bottom: 0.5rem; /* Space between stacked buttons */
+  }
+
+  .auth-buttons {
+    flex-direction: column;
   }
 }
 

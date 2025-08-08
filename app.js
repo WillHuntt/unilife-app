@@ -39,7 +39,6 @@ if (!firebaseConfig.apiKey) {
     throw new Error("Firebase API Key is missing."); // Stop script execution
 }
 
-
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
 // Firebase Init
@@ -59,7 +58,12 @@ import {
   getAuth,
   signInAnonymously,
   signInWithCustomToken,
-  onAuthStateChanged
+  onAuthStateChanged,
+  createUserWithEmailAndPassword, // For Email/Password Sign Up
+  signInWithEmailAndPassword,     // For Email/Password Sign In
+  signOut,                        // For Sign Out
+  GoogleAuthProvider,             // For Google Sign-In
+  signInWithPopup                 // For Google Sign-In
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // Initialize Firebase with the determined config
@@ -81,6 +85,15 @@ const endInput = document.getElementById("end");
 const categoryInput = document.getElementById("category");
 const deleteBtn = document.getElementById("delete-task-btn");
 const closeModalBtn = document.getElementById("close-modal-btn");
+
+// Authentication UI elements
+const emailInput = document.getElementById("auth-email");
+const passwordInput = document.getElementById("auth-password");
+const signUpBtn = document.getElementById("auth-signup-btn");
+const signInBtn = document.getElementById("auth-signin-btn");
+const googleSignInBtn = document.getElementById("google-signin-btn"); // New Google button
+const signOutBtn = document.getElementById("auth-signout-btn");
+const authStatusDiv = document.getElementById("auth-status");
 
 // Function to toggle modal visibility
 function toggleModal(show) {
@@ -194,6 +207,83 @@ document.getElementById("toggle-theme").onclick = () => {
   console.log("Theme toggled to:", document.body.dataset.theme);
 };
 
+// --- Authentication Functions ---
+
+// Handle User Sign Up (Email/Password)
+if (signUpBtn) { // Check if element exists
+  signUpBtn.onclick = async () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("User signed up (Email/Password):", userCredential.user.uid);
+      // onAuthStateChanged will handle setting userId and refetching events
+    } catch (error) {
+      console.error("Error signing up:", error.message);
+      authStatusDiv.textContent = `Sign Up Error: ${error.message}`;
+    }
+  };
+}
+
+// Handle User Sign In (Email/Password)
+if (signInBtn) { // Check if element exists
+  signInBtn.onclick = async () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log("User signed in (Email/Password):", userCredential.user.uid);
+      // onAuthStateChanged will handle setting userId and refetching events
+    } catch (error) {
+      console.error("Error signing in:", error.message);
+      authStatusDiv.textContent = `Sign In Error: ${error.message}`;
+    }
+  };
+}
+
+// Handle Google Sign In
+if (googleSignInBtn) { // Check if element exists
+  googleSignInBtn.onclick = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential.accessToken;
+      // The signed-in user info.
+      const user = result.user;
+      console.log("User signed in with Google:", user.uid, user.displayName);
+      // onAuthStateChanged will handle setting userId and refetching events
+    } catch (error) {
+      console.error("Error during Google Sign-In:", error.code, error.message);
+      authStatusDiv.textContent = `Google Sign-In Error: ${error.message}`;
+      // Handle specific errors, e.g., popup closed by user
+      if (error.code === 'auth/popup-closed-by-user') {
+        console.log("Google Sign-In popup was closed by the user.");
+      }
+    }
+  };
+}
+
+// Handle User Sign Out
+if (signOutBtn) { // Check if element exists
+  signOutBtn.onclick = async () => {
+    try {
+      await signOut(auth);
+      console.log("User signed out.");
+      userId = null; // Clear userId
+      isAuthReady = false; // Reset auth status
+      calendar.refetchEvents(); // Clear calendar events for signed out user
+      authStatusDiv.textContent = "Not signed in.";
+      emailInput.value = ""; // Clear email field
+      passwordInput.value = ""; // Clear password field
+    } catch (error) {
+      console.error("Error signing out:", error.message);
+      authStatusDiv.textContent = `Sign Out Error: ${error.message}`;
+    }
+  };
+}
+
 // Initialize FullCalendar when the DOM is loaded
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM Content Loaded. Initializing calendar...");
@@ -234,11 +324,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Authenticate user with Firebase and then refetch events
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // User is signed in
+      // User is signed in (could be anonymous, email/password, or Google)
       userId = user.uid;
+      isAuthReady = true;
       console.log("User authenticated:", userId);
+      authStatusDiv.textContent = `Signed in as: ${user.email || user.displayName || user.uid}`; // Display user info
+      calendar.refetchEvents(); // Load events for the authenticated user
     } else {
-      // User is signed out, sign in anonymously
+      // No user is signed in. Attempt anonymous sign-in as a fallback.
       try {
         console.log("No user signed in. Attempting anonymous sign-in...");
         // Use __initial_auth_token if available, otherwise sign in anonymously
@@ -249,15 +342,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           await signInAnonymously(auth);
           console.log("Signed in anonymously.");
         }
-        userId = auth.currentUser.uid;
-        console.log("Current user ID after sign-in:", userId);
+        // After anonymous sign-in, the onAuthStateChanged listener will fire again
+        // with the new anonymous user, setting userId and refetching events.
       } catch (error) {
-        console.error("Error during authentication:", error);
-        // Handle authentication error, perhaps show a message to the user
+        console.error("Error during initial authentication:", error);
+        // If even anonymous sign-in fails, display a critical error
+        authStatusDiv.textContent = "Authentication failed. Please check console.";
       }
     }
-    isAuthReady = true; // Set auth ready flag
-    calendar.refetchEvents(); // Refetch events now that auth is ready
-    console.log("Authentication state determined. Refetching events.");
   });
 });
