@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UniLife - Login</title> <!-- New title for portal page -->
+
+  <!-- Favicon links for cross-device compatibility -->
+  <!-- Temporary SVG Favicon (a simple calendar icon) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23007bff' d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7zm7 0h3v2h-3zm0 3h3v2h-3z'/%3E%3C/svg%3E" type="image/svg+xml">
+  <!-- Fallback for older browsers or if you prefer .ico -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Google Fonts: Inter and Poppins (same as index.html) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom Styles (re-use existing style.css for consistent look) -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-theme="light">
+  <div class="container">
+    <header>
+      <h1>UniLife</h1>
+      <div class="theme-controls">
+        <button id="toggle-theme" aria-label="Toggle theme" data-tooltip="Toggle Light/Dark Theme">🌗</button>
+        <button id="reset-theme-btn" aria-label="Reset theme to device preference" data-tooltip="Reset to System Theme">🔄</button>
+      </div>
+    </header>
+
+    <!-- Authentication Forms Container (Moved here from index.html) -->
+    <div id="auth-forms-container" class="auth-section">
+      <h2>Sign In / Sign Up to UniLife</h2>
+      <input type="email" id="auth-email" placeholder="Email" />
+      <input type="password" id="auth-password" placeholder="Password" />
+      <div class="auth-buttons">
+        <button id="auth-signup-btn">Sign Up (Email)</button>
+        <button id="auth-signin-btn">Sign In (Email)</button>
+        <button id="google-signin-btn" class="google-btn">Sign In with Google</button>
+      </div>
+      <p id="auth-status">Please sign in to continue.</p>
+    </div>
+
+  </div>
+
+  <!-- Loading Spinner (same as index.html) -->
+  <div id="loading-spinner" class="loading-spinner hidden">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- Confirmation Modal (same as index.html) -->
+  <div id="confirmation-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmation-title">
+    <div class="modal-content">
+      <h3 id="confirmation-title">Confirm Action</h3>
+      <p id="confirmation-message"></p>
+      <div class="modal-buttons">
+        <button id="confirm-yes-btn" class="save-btn">Yes</button>
+        <button id="confirm-no-btn" class="cancel-btn">No</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Created by: Will Hunt <a href="https://www.instagram.com/w1ll.hunt/" target="_blank" rel="noopener noreferrer">@w1ll.hunt</a></p>
+  </footer>
+
+  <!-- New JavaScript for portal page -->
+  <script type="module" src="portal.js"></script>
+</body>
+</html>
