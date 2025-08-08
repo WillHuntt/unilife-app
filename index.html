@@ -134,12 +134,21 @@
   </div>
 
   <footer>
+    <p>&copy; <span id="current-year"></span> UniLife. All rights reserved.</p>
     <p>Created by: Will Hunt <a href="https://www.instagram.com/w1ll.hunt/" target="_blank" rel="noopener noreferrer">@w1ll.hunt</a></p>
+    <p class="legal-links">
+      <a href="terms.html">Terms of Service</a> |
+      <a href="privacy.html">Privacy Policy</a>
+    </p>
   </footer>
 
   <!-- FullCalendar JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
   <!-- Your application's JavaScript -->
   <script type="module" src="app.js"></script>
+  <script>
+    // Dynamically set current year for copyright
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
