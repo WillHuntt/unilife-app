@@ -233,7 +233,7 @@ header h1 {
     width: 100%;
     max-height: calc(90vh - 4rem);
     overflow-y: auto;
-    padding-right: 10px;
+    padding-right: 10px; /* Keep this for scrollbar spacing */
     box-sizing: border-box;
 }
 
@@ -262,8 +262,9 @@ header h1 {
 }
 
 .modal input,
-.modal select { /* Removed textarea from this selector, but KEEP this rule for other inputs/selects */
-  width: calc(100% - 20px);
+.modal select,
+.modal textarea { /* Unified selector for consistent styling */
+  width: 100%; /* Make all these elements take full width */
   padding: 0.8rem 10px;
   margin-bottom: 1rem;
   border-radius: 8px;
@@ -272,32 +273,13 @@ header h1 {
   color: var(--text);
   font-size: 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.modal textarea { /* Targeted textarea specifically */
-  width: 100%;
-  padding: 0.8rem 10px;
-  margin-bottom: 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 1rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  box-sizing: border-box; /* Crucial for textarea */
+  box-sizing: border-box; /* Include padding/border in the width */
 }
 
 .modal input[type="color"] {
-  /* Adjusted width and padding for consistent sizing */
-  width: calc(100% - 20px); /* Match other inputs' width calculation */
   height: 40px; /* Keep consistent height */
-  padding: 0.8rem 10px; /* Match other inputs' padding */
-  border: 1px solid var(--border); /* Add back border */
-  background: var(--bg); /* Set background */
-  cursor: pointer;
-  box-sizing: border-box; /* Crucial for color picker */
-  border-radius: 8px; /* Match other inputs' border-radius */
-  transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Maintain transitions */
+  /* The other properties (width, padding, border, background, cursor, box-sizing, border-radius, transition)
+     are now covered by the general .modal input rule above. */
 }
 
 
