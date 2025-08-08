@@ -83,9 +83,17 @@ body {
 /* Header styling */
 header {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Adjusted to space-between for portal page */
   align-items: center;
   margin-bottom: 1.5rem;
+  /* On portal page, we want the title centered across the whole width */
+  /* Remove specific flex centering here as we'll use a wrapper div */
+}
+
+/* New: Wrapper for app title to allow centering */
+.app-title-container {
+  flex-grow: 1; /* Allows it to take up available space in header */
+  text-align: center; /* Centers the h1 inside */
 }
 
 header h1 {
@@ -93,12 +101,30 @@ header h1 {
   font-weight: 700; /* Bolder for UniLife */
   color: var(--text);
   margin: 0;
+  animation: pulse 2s infinite alternate; /* Apply animation */
+}
+
+/* Keyframe animation for pulse effect */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.03); /* Slightly larger */
+    opacity: 0.95; /* Slightly faded */
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Theme controls container */
 .theme-controls {
   display: flex;
   gap: 0.5rem;
+  flex-shrink: 0; /* Prevent from shrinking */
 }
 
 /* Theme toggle button */
