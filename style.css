@@ -206,14 +206,13 @@ header h1 {
   box-shadow: 0 8px 20px var(--shadow-dark);
   display: flex;
   flex-direction: column;
+  /* Changed from center to flex-start to allow content to naturally flow from top */
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* IMPORTANT: Changed to flex-start */
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease; /* Added transform for animation */
-  /* Added for scrolling functionality */
-  max-height: 90vh; /* Limit modal height to 90% of viewport height */
-  overflow-y: auto; /* Enable vertical scrolling if content overflows */
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+  /* Removed max-height and overflow-y from here, will apply to form instead */
   box-sizing: border-box; /* Include padding in the height calculation */
 }
 
@@ -227,6 +226,17 @@ header h1 {
   opacity: 1;
   visibility: visible;
   transform: translate(-50%, -50%) scale(1); /* Scale up on show */
+}
+
+/* Make the form itself scrollable if its content overflows */
+#task-form {
+    display: flex; /* Make form a flex container */
+    flex-direction: column; /* Stack its children vertically */
+    width: 100%; /* Ensure form takes full width of modal */
+    max-height: calc(90vh - 4rem); /* Max height for form: 90% viewport height minus 2*padding */
+    overflow-y: auto; /* Enable vertical scrolling for the form content */
+    padding-right: 10px; /* Add some padding for the scrollbar if present */
+    box-sizing: border-box;
 }
 
 /* Confirmation Modal specific styles */
@@ -296,6 +306,7 @@ header h1 {
   gap: 0.8rem;
   margin-top: 1.5rem;
   width: 100%;
+  flex-shrink: 0; /* Prevent buttons from shrinking inside the scrollable form */
 }
 
 .modal-buttons button {
