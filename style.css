@@ -206,36 +206,34 @@ header h1 {
   box-shadow: 0 8px 20px var(--shadow-dark);
   display: flex;
   flex-direction: column;
-  /* Changed from center to flex-start to allow content to naturally flow from top */
   align-items: center;
-  justify-content: flex-start; /* IMPORTANT: Changed to flex-start */
+  justify-content: flex-start;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
-  /* Removed max-height and overflow-y from here, will apply to form instead */
-  box-sizing: border-box; /* Include padding in the height calculation */
+  box-sizing: border-box;
 }
 
 .modal.hidden {
   opacity: 0;
   visibility: hidden;
-  transform: translate(-50%, -45%) scale(0.95); /* Slight scale down on hide */
+  transform: translate(-50%, -45%) scale(0.95);
 }
 
 .modal:not(.hidden) {
   opacity: 1;
   visibility: visible;
-  transform: translate(-50%, -50%) scale(1); /* Scale up on show */
+  transform: translate(-50%, -50%) scale(1);
 }
 
 /* Make the form itself scrollable if its content overflows */
 #task-form {
-    display: flex; /* Make form a flex container */
-    flex-direction: column; /* Stack its children vertically */
-    width: 100%; /* Ensure form takes full width of modal */
-    max-height: calc(90vh - 4rem); /* Max height for form: 90% viewport height minus 2*padding */
-    overflow-y: auto; /* Enable vertical scrolling for the form content */
-    padding-right: 10px; /* Add some padding for the scrollbar if present */
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: calc(90vh - 4rem);
+    overflow-y: auto;
+    padding-right: 10px;
     box-sizing: border-box;
 }
 
@@ -264,8 +262,7 @@ header h1 {
 }
 
 .modal input,
-.modal select,
-.modal textarea { /* Added textarea */
+.modal select { /* Removed textarea from this selector, but KEEP this rule for other inputs/selects */
   width: calc(100% - 20px);
   padding: 0.8rem 10px;
   margin-bottom: 1rem;
@@ -277,25 +274,43 @@ header h1 {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.modal input[type="color"] {
-  height: 40px;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
+.modal textarea { /* Targeted textarea specifically */
   width: 100%;
+  padding: 0.8rem 10px;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box; /* Crucial for textarea */
 }
+
+.modal input[type="color"] {
+  /* Adjusted width and padding for consistent sizing */
+  width: calc(100% - 20px); /* Match other inputs' width calculation */
+  height: 40px; /* Keep consistent height */
+  padding: 0.8rem 10px; /* Match other inputs' padding */
+  border: 1px solid var(--border); /* Add back border */
+  background: var(--bg); /* Set background */
+  cursor: pointer;
+  box-sizing: border-box; /* Crucial for color picker */
+  border-radius: 8px; /* Match other inputs' border-radius */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Maintain transitions */
+}
+
 
 .modal input:focus,
 .modal select:focus,
-.modal textarea:focus { /* Added textarea */
+.modal textarea:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 .modal input::placeholder,
-.modal textarea::placeholder { /* Added textarea */
+.modal textarea::placeholder {
   color: var(--info);
 }
 
@@ -306,7 +321,7 @@ header h1 {
   gap: 0.8rem;
   margin-top: 1.5rem;
   width: 100%;
-  flex-shrink: 0; /* Prevent buttons from shrinking inside the scrollable form */
+  flex-shrink: 0;
 }
 
 .modal-buttons button {
