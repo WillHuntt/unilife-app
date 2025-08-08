@@ -33,8 +33,6 @@ if (typeof __firebase_config !== 'undefined' && __firebase_config) {
 // Crucial check: Ensure apiKey is present before initializing Firebase
 if (!firebaseConfig.apiKey) {
     console.error("Firebase API Key is missing. Please ensure it's provided in firebaseConfig.");
-    // You might want to display a user-friendly error message on the UI here
-    // For now, we'll prevent further Firebase initialization
     alert("Error: Firebase API Key is missing. Please check console for details.");
     throw new Error("Firebase API Key is missing."); // Stop script execution
 }
@@ -59,11 +57,11 @@ import {
   signInAnonymously,
   signInWithCustomToken,
   onAuthStateChanged,
-  createUserWithEmailAndPassword, // For Email/Password Sign Up
-  signInWithEmailAndPassword,     // For Email/Password Sign In
-  signOut,                        // For Sign Out
-  GoogleAuthProvider,             // For Google Sign-In
-  signInWithPopup                 // For Google Sign-In
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // Initialize Firebase with the determined config
@@ -73,12 +71,12 @@ const auth = getAuth(app);
 
 let calendar;
 let selectedEvent = null;
-let userId = null; // To store the current user's ID
-let isAuthReady = false; // Flag to indicate if authentication state has been determined
+let userId = null;
+let isAuthReady = false;
 
 // Modal & form elements
-const modal = document.getElementById("task-modal");
-const form = document.getElementById("task-form");
+const taskModal = document.getElementById("task-modal"); // Renamed to avoid conflict
+const taskForm = document.getElementById("task-form");   // Renamed
 const titleInput = document.getElementById("title");
 const startInput = document.getElementById("start");
 const endInput = document.getElementById("end");
@@ -87,7 +85,7 @@ const colorPicker = document.getElementById("color-picker"); // New color picker
 const iconPicker = document.getElementById("icon-picker");   // New icon picker select
 const deleteBtn = document.getElementById("delete-task-btn");
 const closeModalBtn = document.getElementById("close-modal-btn");
-const emptyCalendarMessage = document.getElementById("empty-calendar-message"); // Empty state message
+const emptyCalendarMessage = document.getElementById("empty-calendar-message");
 
 // Authentication UI elements
 const emailInput = document.getElementById("auth-email");
@@ -98,25 +96,139 @@ const googleSignInBtn = document.getElementById("google-signin-btn");
 const signOutBtn = document.getElementById("auth-signout-btn");
 const authStatusDiv = document.getElementById("auth-status");
 const toggleThemeBtn = document.getElementById("toggle-theme");
+const resetThemeBtn = document.getElementById("reset-theme-btn");
 
-// Function to toggle modal visibility
-function toggleModal(show) {
-  modal.classList.toggle("hidden", !show);
-  // Reset form and selected event when modal is hidden
+// Event Popover elements
+const eventPopover = document.getElementById("event-popover");
+const popoverTitle = document.getElementById("popover-title");
+const popoverTime = document.getElementById("popover-time");
+const popoverCategory = document.getElementById("popover-category");
+const popoverEditBtn = document.getElementById("popover-edit-btn");
+const popoverDeleteBtn = document.getElementById("popover-delete-btn");
+const popoverCloseBtn = document.getElementById("popover-close-btn");
+
+// Confirmation Modal elements
+const confirmationModal = document.getElementById("confirmation-modal");
+const confirmationMessage = document.getElementById("confirmation-message");
+const confirmYesBtn = document.getElementById("confirm-yes-btn");
+const confirmNoBtn = document.getElementById("confirm-no-btn");
+let onConfirmCallback = null; // Callback for confirmation dialog
+
+// Function to toggle task modal visibility
+function toggleTaskModal(show) {
+  taskModal.classList.toggle("hidden", !show);
   if (!show) {
-    form.reset();
+    taskForm.reset();
     selectedEvent = null;
-    colorPicker.value = "#007bff"; // Reset color picker to default primary
+    colorPicker.value = "#3498db"; // Reset color picker to default primary
     iconPicker.value = ""; // Reset icon picker
+    hidePopover(); // Ensure popover is hidden when task modal opens/closes
   }
 }
 
+// Function to toggle confirmation modal visibility
+function showConfirmationDialog(message, onConfirm) {
+  confirmationMessage.textContent = message;
+  onConfirmCallback = onConfirm; // Store the callback
+  confirmationModal.classList.remove("hidden");
+  // Hide task modal if it's open
+  if (!taskModal.classList.contains("hidden")) {
+    taskModal.classList.add("hidden");
+  }
+  hidePopover(); // Hide popover if it's open
+}
+
+function hideConfirmationDialog() {
+  confirmationModal.classList.add("hidden");
+  onConfirmCallback = null;
+}
+
+// Confirmation button handlers
+if (confirmYesBtn) {
+  confirmYesBtn.onclick = () => {
+    if (onConfirmCallback) {
+      onConfirmCallback(true);
+    }
+    hideConfirmationDialog();
+  };
+}
+
+if (confirmNoBtn) {
+  confirmNoBtn.onclick = () => {
+    if (onConfirmCallback) {
+      onConfirmCallback(false);
+    }
+    hideConfirmationDialog();
+  };
+}
+
+
+// Function to show event popover
+function showPopover(event, jsEvent) {
+  selectedEvent = event; // Set selected event for popover actions
+  popoverTitle.textContent = event.extendedProps.originalTitle; // Use original title
+  popoverTime.textContent = `${event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${event.end ? event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'No end time'}`;
+  popoverCategory.textContent = `Category: ${event.extendedProps.category}`;
+
+  // Position the popover near the clicked event
+  const rect = jsEvent.target.getBoundingClientRect();
+  eventPopover.style.top = `${rect.bottom + window.scrollY + 10}px`;
+  eventPopover.style.left = `${rect.left + window.scrollX}px`;
+  eventPopover.classList.remove("hidden");
+}
+
+// Function to hide event popover
+function hidePopover() {
+  eventPopover.classList.add("hidden");
+  selectedEvent = null; // Clear selected event when popover is hidden
+}
+
+// Popover button handlers
+if (popoverEditBtn) {
+  popoverEditBtn.onclick = () => {
+    if (selectedEvent) {
+      titleInput.value = selectedEvent.extendedProps.originalTitle;
+      startInput.value = selectedEvent.start.toISOString().slice(0, 16);
+      endInput.value = selectedEvent.end?.toISOString().slice(0, 16) || "";
+      categoryInput.value = selectedEvent.extendedProps.category;
+      colorPicker.value = selectedEvent.extendedProps.color || "#3498db";
+      iconPicker.value = selectedEvent.extendedProps.icon || "";
+      toggleTaskModal(true); // Open the main task modal for editing
+    }
+    hidePopover();
+  };
+}
+
+if (popoverDeleteBtn) {
+  popoverDeleteBtn.onclick = () => {
+    showConfirmationDialog("Are you sure you want to delete this event?", async (confirmed) => {
+      if (confirmed && selectedEvent) {
+        await deleteEvent(selectedEvent.id); // Call delete function
+      }
+      hidePopover();
+    });
+  };
+}
+
+if (popoverCloseBtn) {
+  popoverCloseBtn.onclick = () => hidePopover();
+}
+
+// Close popover if clicking outside it
+document.addEventListener('click', (e) => {
+  if (!eventPopover.classList.contains('hidden') &&
+      !eventPopover.contains(e.target) &&
+      !e.target.closest('.fc-event')) { // Don't hide if clicking on another event
+    hidePopover();
+  }
+});
+
+
 // Function to load events from Firebase
 async function loadEvents(fetchInfo, successCallback, failureCallback) {
-  // Only attempt to load events if authentication is ready and userId is available
   if (!isAuthReady || !userId) {
     console.log("Authentication not ready or userId not set. Returning empty events.");
-    emptyCalendarMessage.classList.remove("hidden"); // Show empty message if not authenticated
+    emptyCalendarMessage.classList.remove("hidden");
     successCallback([]);
     return;
   }
@@ -130,24 +242,22 @@ async function loadEvents(fetchInfo, successCallback, failureCallback) {
       const data = doc.data();
       return {
         id: doc.id,
-        title: data.icon ? `${data.icon} ${data.title}` : data.title, // Prepend icon to title
+        title: data.icon ? `${data.icon} ${data.title}` : data.title,
         start: data.start,
         end: data.end,
         extendedProps: {
           category: data.category,
-          originalTitle: data.title, // Store original title without icon
-          color: data.color || null, // Store custom color
-          icon: data.icon || null    // Store custom icon
+          originalTitle: data.title,
+          color: data.color || null,
+          icon: data.icon || null
         },
-        // Use custom color if available, otherwise fall back to category class
         backgroundColor: data.color || '',
         borderColor: data.color || '',
-        classNames: data.color ? [] : [`fc-event-${data.category}`] // Only apply category class if no custom color
+        classNames: data.color ? [] : [`fc-event-${data.category}`]
       };
     });
     console.log("Events loaded:", events);
 
-    // Show/hide empty message based on loaded events
     if (events.length === 0) {
       emptyCalendarMessage.classList.remove("hidden");
     } else {
@@ -158,12 +268,12 @@ async function loadEvents(fetchInfo, successCallback, failureCallback) {
   } catch (error) {
     console.error("Error loading events:", error);
     failureCallback(error);
-    emptyCalendarMessage.classList.remove("hidden"); // Show empty message on error
+    emptyCalendarMessage.classList.remove("hidden");
   }
 }
 
 // Function to save (add or edit) an event to Firebase
-form.onsubmit = async e => {
+taskForm.onsubmit = async e => {
   e.preventDefault();
 
   if (!userId) {
@@ -176,8 +286,8 @@ form.onsubmit = async e => {
     start: startInput.value,
     end: endInput.value,
     category: categoryInput.value,
-    color: colorPicker.value, // Save custom color
-    icon: iconPicker.value,   // Save custom icon
+    color: colorPicker.value,
+    icon: iconPicker.value,
     userId: userId
   };
 
@@ -190,81 +300,102 @@ form.onsubmit = async e => {
       console.log("Event added with ID:", docRef.id);
     }
 
-    toggleModal(false);
+    toggleTaskModal(false);
     calendar.refetchEvents();
   } catch (error) {
     console.error("Error saving event:", error);
   }
 };
 
-// Function to delete an event from Firebase
-deleteBtn.onclick = async () => {
-  if (!selectedEvent || !userId) {
-    console.error("No event selected or user not authenticated. Cannot delete event.");
+// Function to delete an event from Firebase (extracted for reuse)
+async function deleteEvent(eventId) {
+  if (!userId) {
+    console.error("User not authenticated. Cannot delete event.");
     return;
   }
-
   try {
-    await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, selectedEvent.id));
-    console.log("Event deleted:", selectedEvent.id);
-    toggleModal(false);
+    await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/events`, eventId));
+    console.log("Event deleted:", eventId);
     calendar.refetchEvents();
   } catch (error) {
     console.error("Error deleting event:", error);
   }
-};
+}
+
+// Original delete button handler (now uses confirmation dialog)
+if (deleteBtn) {
+  deleteBtn.onclick = () => {
+    if (selectedEvent) {
+      showConfirmationDialog("Are you sure you want to delete this event?", async (confirmed) => {
+        if (confirmed) {
+          await deleteEvent(selectedEvent.id);
+          toggleTaskModal(false); // Close task modal after deletion
+        }
+      });
+    }
+  };
+}
 
 // Modal cancel button click handler
-closeModalBtn.onclick = () => toggleModal(false);
+if (closeModalBtn) {
+  closeModalBtn.onclick = () => toggleTaskModal(false);
+}
+
 
 // --- Theme Management ---
-const THEME_STORAGE_KEY = 'user-theme'; // Key for localStorage
+const THEME_STORAGE_KEY = 'user-theme';
 
-// Function to set the theme and save to localStorage
 function setTheme(theme) {
   document.body.dataset.theme = theme;
   localStorage.setItem(THEME_STORAGE_KEY, theme);
+  updateThemeToggleButton(theme);
   console.log("Theme set to:", theme);
 }
 
-// Function to get the preferred system theme
 function getSystemTheme() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
-// Initialize theme on page load
+function updateThemeToggleButton(theme) {
+  if (toggleThemeBtn) {
+    toggleThemeBtn.textContent = theme === 'dark' ? '☀️' : '🌗';
+    toggleThemeBtn.setAttribute('data-tooltip', `Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Theme`);
+  }
+}
+
 function initializeTheme() {
   const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
   if (savedTheme) {
-    // Use saved theme if available
     setTheme(savedTheme);
   } else {
-    // Otherwise, use system preference
     setTheme(getSystemTheme());
   }
 }
 
-// Listen for system theme changes
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
-  // Only update if no explicit theme is saved by the user
   if (!localStorage.getItem(THEME_STORAGE_KEY)) {
     setTheme(event.matches ? 'dark' : 'light');
   }
 });
 
-// Theme toggle button click handler
 if (toggleThemeBtn) {
   toggleThemeBtn.onclick = () => {
     const currentTheme = document.body.dataset.theme;
     const newTheme = currentTheme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
+    setTheme(newTheme); // This will save the new preference
+  };
+}
+
+if (resetThemeBtn) {
+  resetThemeBtn.onclick = () => {
+    localStorage.removeItem(THEME_STORAGE_KEY);
+    setTheme(getSystemTheme());
+    console.log("Theme reset to system preference.");
   };
 }
 
 
 // --- Authentication Functions ---
-
-// Handle User Sign Up (Email/Password)
 if (signUpBtn) {
   signUpBtn.onclick = async () => {
     const email = emailInput.value;
@@ -279,7 +410,6 @@ if (signUpBtn) {
   };
 }
 
-// Handle User Sign In (Email/Password)
 if (signInBtn) {
   signInBtn.onclick = async () => {
     const email = emailInput.value;
@@ -294,7 +424,6 @@ if (signInBtn) {
   };
 }
 
-// Handle Google Sign In
 if (googleSignInBtn) {
   googleSignInBtn.onclick = async () => {
     const provider = new GoogleAuthProvider();
@@ -314,7 +443,6 @@ if (googleSignInBtn) {
   };
 }
 
-// Handle User Sign Out
 if (signOutBtn) {
   signOutBtn.onclick = async () => {
     try {
@@ -326,8 +454,8 @@ if (signOutBtn) {
       authStatusDiv.textContent = "Not signed in.";
       emailInput.value = "";
       passwordInput.value = "";
-      localStorage.removeItem(THEME_STORAGE_KEY); // Remove user's manual theme preference
-      setTheme(getSystemTheme()); // Revert to system theme on sign out
+      localStorage.removeItem(THEME_STORAGE_KEY);
+      setTheme(getSystemTheme());
     } catch (error) {
       console.error("Error signing out:", error.message);
       authStatusDiv.textContent = `Sign Out Error: ${error.message}`;
@@ -339,61 +467,51 @@ if (signOutBtn) {
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM Content Loaded. Initializing calendar and theme...");
 
-  // Initialize Theme first
   initializeTheme();
 
   const calendarEl = document.getElementById("calendar");
 
-  // Initialize FullCalendar instance
   calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: "dayGridMonth", // Display month view initially
-    selectable: true, // Allow date selection
-    editable: true, // Enable drag-and-drop and resizing
-    height: "auto", // Calendar height adjusts to content
-    events: loadEvents, // Function to load events from Firebase
-    headerToolbar: { // New header toolbar for view switching
+    initialView: "dayGridMonth",
+    selectable: true,
+    editable: true, // Enabled for drag-and-drop/resizing
+    height: "auto",
+    events: loadEvents,
+    headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay' // Added week and day views
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
     },
-    slotMinTime: '06:00:00', // Start day at 6 AM
-    slotMaxTime: '22:00:00', // End day at 10 PM
-    eventDidMount: function(info) { // Custom rendering for events (e.g., custom color)
-      if (info.event.extendedProps.color) {
-        info.el.style.backgroundColor = info.event.extendedProps.color;
-        info.el.style.borderColor = info.event.extendedProps.color;
-        info.el.style.color = 'white'; // Ensure text is readable on custom color
-      }
-      // If you want to add the icon dynamically to the event title element
-      // This is handled by prepending the icon in loadEvents now.
+    slotMinTime: '06:00:00',
+    slotMaxTime: '22:00:00',
+    eventDidMount: function(info) {
+      // Custom color is handled by backgroundColor/borderColor directly
+      // Icon is prepended in loadEvents
     },
-    // Handle date clicks to open the modal for adding new events
     dateClick: info => {
       console.log("Date clicked:", info.dateStr);
-      startInput.value = info.dateStr + "T00:00"; // Set start time to midnight
-      endInput.value = info.dateStr + "T01:00";   // Set end time to 1 AM
-      colorPicker.value = "#007bff"; // Set default color for new event
+      selectedEvent = null; // Ensure no event is pre-selected for new entry
+      titleInput.value = ""; // Clear title
+      startInput.value = info.dateStr + "T00:00";
+      endInput.value = info.dateStr + "T01:00";
+      categoryInput.value = "university"; // Default category
+      colorPicker.value = "#3498db"; // Default color
       iconPicker.value = ""; // No default icon
-      toggleModal(true); // Show the modal
+      toggleTaskModal(true);
     },
-    // Handle event clicks to open the modal for editing/deleting events
     eventClick: info => {
-      console.log("Event clicked:", info.event.id, info.event.title);
-      selectedEvent = info.event; // Store the clicked event
-      titleInput.value = info.event.extendedProps.originalTitle; // Use original title
-      startInput.value = info.event.start.toISOString().slice(0, 16);
-      endInput.value = info.event.end?.toISOString().slice(0, 16) || "";
-      categoryInput.value = info.event.extendedProps.category;
-      colorPicker.value = info.event.extendedProps.color || "#007bff"; // Set existing color or default
-      iconPicker.value = info.event.extendedProps.icon || ""; // Set existing icon or none
-      toggleModal(true); // Show the modal
+      // Hide popover if another event is clicked
+      if (selectedEvent && selectedEvent.id === info.event.id) {
+        hidePopover(); // Clicked same event, hide popover/modal
+      } else {
+        showPopover(info.event, info.jsEvent); // Show popover for this event
+      }
     },
-    // Handle event drop (drag-and-drop)
     eventDrop: async function(info) {
       console.log("Event dropped:", info.event.id, info.event.start, info.event.end);
       if (!userId) {
         console.error("User not authenticated. Cannot update event on drop.");
-        info.revert(); // Revert the event to its original position
+        info.revert();
         return;
       }
       try {
@@ -404,15 +522,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log("Event updated in Firestore after drop.");
       } catch (error) {
         console.error("Error updating event on drop:", error);
-        info.revert(); // Revert if update fails
+        info.revert();
       }
     },
-    // Handle event resize
     eventResize: async function(info) {
       console.log("Event resized:", info.event.id, info.event.start, info.event.end);
       if (!userId) {
         console.error("User not authenticated. Cannot update event on resize.");
-        info.revert(); // Revert the event
+        info.revert();
         return;
       }
       try {
@@ -423,16 +540,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log("Event updated in Firestore after resize.");
       } catch (error) {
         console.error("Error updating event on resize:", error);
-        info.revert(); // Revert if update fails
+        info.revert();
       }
     }
   });
 
-  // Render the calendar immediately after instantiation
   calendar.render();
   console.log("Calendar rendered.");
 
-  // Authenticate user with Firebase and then refetch events
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       userId = user.uid;

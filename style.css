@@ -1,64 +1,68 @@
 /* Root variables for light theme (default) */
 :root {
-  --bg: #f0f4f8; /* Soft light background */
-  --text: #2c3e50; /* Deep charcoal text */
-  --card: #ffffff; /* Clean white card background */
-  --border: #e0e6ed; /* Light grey border */
-  --primary: #3498db; /* Vibrant blue for university */
-  --secondary: #2ecc71; /* Fresh green for fitness */
-  --accent: #f39c12; /* Warm orange for other */
-  --danger: #e74c3c; /* Alert red for delete */
-  --info: #95a5a6; /* Muted grey for cancel */
+  --bg: #f8f9fa; /* Very light grey */
+  --text: #34495e; /* Dark blue-grey */
+  --card: #ffffff; /* Pure white */
+  --border: #e0e6ed; /* Light grey-blue */
+  --primary: #4a90e2; /* Bright sky blue */
+  --secondary: #50e3c2; /* Mint green */
+  --accent: #f5a623; /* Golden orange */
+  --danger: #e74c3c; /* Classic red */
+  --info: #9b9b9b; /* Medium grey */
   --shadow-light: rgba(0, 0, 0, 0.08);
   --shadow-dark: rgba(0, 0, 0, 0.25);
-  --google-blue: #4285f4; /* Google brand blue */
-  --google-blue-dark: #3367d6; /* Darker Google blue for hover */
+  --google-blue: #4285f4;
+  --google-blue-dark: #3367d6;
 }
 
 /* Dark theme variables applied automatically if system prefers dark */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1a202c; /* Dark charcoal background */
-    --text: #e2e8f0; /* Light grey text */
-    --card: #2d3748; /* Darker card background */
-    --border: #4a5568; /* Muted dark border */
-    --primary: #63b3ed; /* Lighter blue for dark theme */
-    --secondary: #48bb78; /* Lighter green for dark theme */
-    --accent: #f6ad55; /* Muted gold for dark theme */
-    --danger: #fc8181; /* Lighter red */
+    --bg: #2c3e50; /* Deep blue-grey */
+    --text: #ecf0f1; /* Off-white */
+    --card: #34495e; /* Darker blue-grey */
+    --border: #4a6572; /* Muted dark blue */
+    --primary: #7cb9e8; /* Lighter sky blue */
+    --secondary: #82e9de; /* Lighter mint green */
+    --accent: #f7b731; /* Lighter golden orange */
+    --danger: #ff6b6b; /* Brighter red */
     --info: #a0aec0; /* Lighter grey */
   }
 }
 
 /* Dark theme variables applied when data-theme="dark" is explicitly set (manual override) */
 body[data-theme="dark"] {
-  --bg: #1a202c;
-  --text: #e2e8f0;
-  --card: #2d3748;
-  --border: #4a5568;
-  --primary: #63b3ed;
-  --secondary: #48bb78;
-  --accent: #f6ad55;
-  --danger: #fc8181;
+  --bg: #2c3e50;
+  --text: #ecf0f1;
+  --card: #34495e;
+  --border: #4a6572;
+  --primary: #7cb9e8;
+  --secondary: #82e9de;
+  --accent: #f7b731;
+  --danger: #ff6b6b;
   --info: #a0aec0;
 }
 
 
 /* Base styles */
 body {
-  font-family: 'Inter', sans-serif; /* Modern sans-serif font */
+  font-family: 'Inter', sans-serif;
   background-color: var(--bg);
   color: var(--text);
   margin: 0;
   padding: 0;
   line-height: 1.6;
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth theme transition */
+  transition: background-color 0.3s ease, color 0.3s ease;
+  display: flex; /* Use flexbox for overall layout */
+  flex-direction: column; /* Stack content vertically */
+  min-height: 100vh; /* Ensure body takes full viewport height */
 }
 
 .container {
-  max-width: 900px; /* Increased max-width for better calendar display */
+  max-width: 900px;
   margin: 2rem auto;
-  padding: 1.5rem; /* Increased padding */
+  padding: 1.5rem;
+  flex-grow: 1; /* Allow container to grow and push footer down */
 }
 
 /* Header styling */
@@ -66,21 +70,27 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem; /* Increased margin */
+  margin-bottom: 1.5rem;
 }
 
 header h1 {
-  font-family: 'Poppins', sans-serif; /* Distinct font for heading */
-  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700; /* Bolder for UniLife */
   color: var(--text);
   margin: 0;
 }
 
+/* Theme controls container */
+.theme-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
 /* Theme toggle button */
-#toggle-theme {
+#toggle-theme, #reset-theme-btn {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 50%; /* Circular button */
+  border-radius: 50%;
   width: 40px;
   height: 40px;
   display: flex;
@@ -90,10 +100,11 @@ header h1 {
   cursor: pointer;
   box-shadow: 0 2px 5px var(--shadow-light);
   transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-  position: relative; /* For tooltip */
+  position: relative;
+  flex-shrink: 0;
 }
 
-#toggle-theme:hover {
+#toggle-theme:hover, #reset-theme-btn:hover {
   background-color: var(--border);
   box-shadow: 0 4px 8px var(--shadow-dark);
 }
@@ -102,7 +113,7 @@ header h1 {
 [data-tooltip]:hover::after {
   content: attr(data-tooltip);
   position: absolute;
-  top: 100%; /* Position below the button */
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
   background-color: var(--text);
@@ -127,25 +138,25 @@ header h1 {
 /* Calendar container */
 #calendar {
   background-color: var(--card);
-  border-radius: 12px; /* More rounded corners */
-  padding: 1rem; /* Increased padding */
-  box-shadow: 0 4px 15px var(--shadow-light); /* Softer, larger shadow */
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 15px var(--shadow-light);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  min-height: 400px; /* Ensure calendar has a minimum height */
+  min-height: 400px;
 }
 
 /* FullCalendar specific overrides */
 .fc .fc-toolbar-title {
   font-family: 'Poppins', sans-serif;
-  font-size: 1.8rem; /* Slightly larger title */
+  font-size: 1.8rem;
   font-weight: 600;
   color: var(--text);
 }
 
 .fc-button {
   font-size: 0.9rem !important;
-  padding: 0.6rem 1rem !important; /* Larger buttons */
-  border-radius: 8px !important; /* More rounded buttons */
+  padding: 0.6rem 1rem !important;
+  border-radius: 8px !important;
   background-color: var(--primary) !important;
   border-color: var(--primary) !important;
   color: white !important;
@@ -154,78 +165,96 @@ header h1 {
 }
 
 .fc-button:hover {
-  background-color: #0056b3 !important; /* Darker blue on hover */
+  background-color: color-mix(in srgb, var(--primary) 80%, black) !important; /* Slightly darker on hover */
   box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
 }
 
 .fc-button-active {
-  background-color: #0056b3 !important;
-  border-color: #0056b3 !important;
+  background-color: color-mix(in srgb, var(--primary) 70%, black) !important;
+  border-color: color-mix(in srgb, var(--primary) 70%, black) !important;
 }
 
 /* Calendar day cells */
 .fc-daygrid-day {
-  border-radius: 6px; /* Slightly rounded day cells */
+  border-radius: 6px;
   transition: background-color 0.1s ease;
 }
 
 .fc-daygrid-day:hover {
-  background-color: var(--border); /* Subtle hover effect on days */
+  background-color: var(--border);
 }
 
 /* Custom event icon styling */
 .fc-event-main-frame .event-icon {
   margin-right: 5px;
-  font-size: 0.9em; /* Adjust size as needed */
+  font-size: 0.9em;
   vertical-align: middle;
 }
 
-/* Modal styling */
+/* Modal styling (for task modal and confirmation modal) */
 .modal {
   position: fixed;
   top: 50%;
   left: 50%;
   background: var(--card);
   border-radius: 12px;
-  padding: 2rem; /* More padding */
-  width: 90%; /* Responsive width */
-  max-width: 450px; /* Max width for larger screens */
+  padding: 2rem;
+  width: 90%;
+  max-width: 450px;
   transform: translate(-50%, -50%);
   z-index: 1001;
-  box-shadow: 0 8px 20px var(--shadow-dark); /* Stronger shadow */
-  display: flex; /* Use flex for centering content */
+  box-shadow: 0 8px 20px var(--shadow-dark);
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  opacity: 0; /* Start hidden for animation */
+  opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease; /* Added transform for animation */
 }
 
 .modal.hidden {
   opacity: 0;
   visibility: hidden;
+  transform: translate(-50%, -45%) scale(0.95); /* Slight scale down on hide */
 }
 
 .modal:not(.hidden) {
   opacity: 1;
   visibility: visible;
+  transform: translate(-50%, -50%) scale(1); /* Scale up on show */
+}
+
+/* Confirmation Modal specific styles */
+#confirmation-modal .modal-content {
+  text-align: center;
+}
+
+#confirmation-modal h3 {
+  margin-top: 0;
+  color: var(--text);
+  font-family: 'Poppins', sans-serif;
+}
+
+#confirmation-modal p {
+  margin-bottom: 1.5rem;
+  color: var(--text);
 }
 
 /* Form elements within modal */
 .modal label {
   display: block;
-  margin: 0.8rem 0 0.4rem 0; /* More spacing */
+  margin: 0.8rem 0 0.4rem 0;
   font-weight: 500;
   color: var(--text);
 }
 
 .modal input,
 .modal select {
-  width: calc(100% - 20px); /* Adjust width for padding */
-  padding: 0.8rem 10px; /* More padding */
-  margin-bottom: 1rem; /* More spacing */
-  border-radius: 8px; /* More rounded */
+  width: calc(100% - 20px);
+  padding: 0.8rem 10px;
+  margin-bottom: 1rem;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
@@ -234,37 +263,37 @@ header h1 {
 }
 
 .modal input[type="color"] {
-  height: 40px; /* Make color picker larger */
+  height: 40px;
   padding: 0;
   border: none;
   background: none;
   cursor: pointer;
-  width: 100%; /* Full width for color picker */
+  width: 100%;
 }
 
 .modal input:focus,
 .modal select:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 .modal input::placeholder {
-  color: #a0a0a0;
+  color: var(--info);
 }
 
 /* Modal buttons */
 .modal-buttons {
   display: flex;
   justify-content: space-between;
-  gap: 0.8rem; /* Increased gap */
-  margin-top: 1.5rem; /* More spacing above buttons */
+  gap: 0.8rem;
+  margin-top: 1.5rem;
   width: 100%;
 }
 
 .modal-buttons button {
   flex: 1;
-  padding: 0.8rem 1rem; /* Larger padding for touch targets */
+  padding: 0.8rem 1rem;
   cursor: pointer;
   border: none;
   border-radius: 8px;
@@ -274,8 +303,8 @@ header h1 {
 }
 
 .modal-buttons button:hover {
-  transform: translateY(-2px); /* Lift effect on hover */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--shadow-dark);
 }
 
 .modal-buttons .save-btn {
@@ -284,25 +313,25 @@ header h1 {
 }
 
 .modal-buttons .save-btn:hover {
-  background-color: #0056b3;
+  background-color: color-mix(in srgb, var(--primary) 80%, black);
 }
 
-#delete-task-btn {
+#delete-task-btn, #popover-delete-btn { /* Apply delete style to popover delete button too */
   background-color: var(--danger);
   color: white;
 }
 
-#delete-task-btn:hover {
-  background-color: #c82333;
+#delete-task-btn:hover, #popover-delete-btn:hover {
+  background-color: color-mix(in srgb, var(--danger) 80%, black);
 }
 
-#close-modal-btn {
+#close-modal-btn, #popover-close-btn, #confirm-no-btn { /* Apply cancel style to popover close and confirm no */
   background-color: var(--info);
   color: white;
 }
 
-#close-modal-btn:hover {
-  background-color: #545b62;
+#close-modal-btn:hover, #popover-close-btn:hover, #confirm-no-btn:hover {
+  background-color: color-mix(in srgb, var(--info) 80%, black);
 }
 
 /* Event category colors (now used as defaults if no custom color) */
@@ -315,13 +344,13 @@ header h1 {
 .fc-event-fitness {
   background-color: var(--secondary) !important;
   border-color: var(--secondary) !important;
-  color: white !important;
+  color: var(--text) !important; /* Ensure text is readable */
 }
 
 .fc-event-other {
   background-color: var(--accent) !important;
   border-color: var(--accent) !important;
-  color: var(--text) !important; /* Ensure text is readable on yellow */
+  color: var(--text) !important;
 }
 
 /* Accessibility: Visually hidden text for screen readers */
@@ -384,7 +413,7 @@ header h1 {
 }
 
 .auth-buttons button:hover {
-  background-color: #0056b3;
+  background-color: color-mix(in srgb, var(--primary) 80%, black);
   transform: translateY(-2px);
 }
 
@@ -393,7 +422,7 @@ header h1 {
 }
 
 #auth-signout-btn:hover {
-  background-color: #545b62;
+  background-color: color-mix(in srgb, var(--info) 80%, black);
 }
 
 /* Google Sign-In Button Specific Style */
@@ -404,7 +433,7 @@ header h1 {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.8rem 1.2rem; /* Ensure consistent padding */
+  padding: 0.8rem 1.2rem;
 }
 
 .google-btn:hover {
@@ -428,6 +457,87 @@ header h1 {
   display: none;
 }
 
+/* Event Popover Styling */
+.event-popover {
+  position: absolute; /* Positioned relative to the event */
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px var(--shadow-dark);
+  z-index: 1000;
+  min-width: 200px;
+  max-width: 300px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.event-popover h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  color: var(--primary); /* Use primary color for title */
+  font-family: 'Poppins', sans-serif;
+}
+
+.event-popover p {
+  margin-bottom: 0.3rem;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.event-popover .popover-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  justify-content: space-between;
+}
+
+.event-popover .popover-btn {
+  padding: 0.6rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  flex: 1;
+}
+
+.event-popover .popover-btn.edit-btn {
+  background-color: var(--primary);
+  color: white;
+}
+
+.event-popover .popover-btn.edit-btn:hover {
+  background-color: color-mix(in srgb, var(--primary) 80%, black);
+}
+
+/* Footer Styling */
+footer {
+  margin-top: 3rem; /* Space above footer */
+  padding: 1.5rem;
+  text-align: center;
+  background-color: var(--card);
+  border-top: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.9rem;
+  box-shadow: 0 -2px 8px var(--shadow-light);
+}
+
+footer a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+footer a:hover {
+  color: color-mix(in srgb, var(--primary) 80%, black);
+  text-decoration: underline;
+}
+
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .container {
@@ -448,16 +558,25 @@ header h1 {
   }
 
   .modal-buttons {
-    flex-direction: column; /* Stack buttons on small screens */
+    flex-direction: column;
   }
 
   .modal-buttons button {
     width: 100%;
-    margin-bottom: 0.5rem; /* Space between stacked buttons */
+    margin-bottom: 0.5rem;
   }
 
   .auth-buttons {
     flex-direction: column;
+  }
+
+  .theme-controls {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .event-popover {
+    max-width: 90%; /* Allow popover to be wider on small screens */
   }
 }
 
@@ -470,7 +589,7 @@ header h1 {
     font-size: 1.2rem;
   }
 
-  #toggle-theme {
+  #toggle-theme, #reset-theme-btn {
     width: 35px;
     height: 35px;
     font-size: 1rem;

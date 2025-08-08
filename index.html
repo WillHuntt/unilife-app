@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reminder Calendar</title>
+  <title>UniLife</title> <!-- Changed website name -->
 
   <!-- Favicon links for cross-device compatibility -->
-  <!-- Temporary SVG Favicon (a simple calendar icon) -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23007bff' d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7zm7 0h3v2h-3zm0 3h3v2h-3z'/%3E%3C/svg%3E" type="image/svg+xml">
-  <!-- Fallback for older browsers or if you prefer .ico -->
+  <!-- IMPORTANT: You need to generate these files (favicon.ico, apple-touch-icon.png, site.webmanifest)
+       from your desired site image and place them in your website's root directory.
+       Use a favicon generator like favicon.io or realfavicongenerator.net -->
   <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png"> <!-- For iOS Home Screen icon -->
+  <link rel="manifest" href="/site.webmanifest"> <!-- Updated to common manifest name -->
 
   <!-- FullCalendar CSS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
@@ -25,8 +25,11 @@
 <body data-theme="light">
   <div class="container">
     <header>
-      <h1>My Reminder Calendar</h1>
-      <button id="toggle-theme" aria-label="Toggle theme" data-tooltip="Toggle Light/Dark Theme">🌗</button>
+      <h1>UniLife</h1> <!-- Changed website name -->
+      <div class="theme-controls">
+        <button id="toggle-theme" aria-label="Toggle theme" data-tooltip="Toggle Light/Dark Theme">🌗</button>
+        <button id="reset-theme-btn" aria-label="Reset theme to device preference" data-tooltip="Reset to System Theme">🔄</button>
+      </div>
     </header>
     <div id="calendar"></div>
     <div id="empty-calendar-message" class="empty-state hidden">
@@ -69,7 +72,7 @@
       </select>
 
       <label for="color-picker">Event Color</label>
-      <input type="color" id="color-picker" value="#007bff" />
+      <input type="color" id="color-picker" value="#3498db" />
 
       <label for="icon-picker">Event Icon</label>
       <select id="icon-picker">
@@ -89,6 +92,35 @@
       </div>
     </form>
   </div>
+
+  <!-- Event Popover (New) -->
+  <div id="event-popover" class="event-popover hidden" role="dialog" aria-modal="false">
+    <h3 id="popover-title"></h3>
+    <p id="popover-time"></p>
+    <p id="popover-category"></p>
+    <div class="popover-buttons">
+      <button id="popover-edit-btn" class="popover-btn edit-btn">Edit</button>
+      <button id="popover-delete-btn" class="popover-btn delete-btn">Delete</button>
+      <button id="popover-close-btn" class="popover-btn cancel-btn">Close</button>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal (New - replaces alert for delete) -->
+  <div id="confirmation-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmation-title">
+    <div class="modal-content">
+      <h3 id="confirmation-title">Confirm Action</h3>
+      <p id="confirmation-message"></p>
+      <div class="modal-buttons">
+        <button id="confirm-yes-btn" class="save-btn">Yes</button>
+        <button id="confirm-no-btn" class="cancel-btn">No</button>
+      </div>
+    </div>
+  </div>
+
+
+  <footer>
+    <p>Created by: Will Hunt <a href="https://www.instagram.com/w1ll.hunt/" target="_blank" rel="noopener noreferrer">@w1ll.hunt</a></p>
+  </footer>
 
   <!-- FullCalendar JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
