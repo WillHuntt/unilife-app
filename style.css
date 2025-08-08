@@ -80,14 +80,12 @@ body {
   z-index: 1; /* Place above the canvas */
 }
 
-/* Header styling */
+/* Header styling (General, for index.html primarily) */
 header {
   display: flex;
-  justify-content: space-between; /* Adjusted to space-between for portal page */
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
-  /* On portal page, we want the title centered across the whole width */
-  /* Remove specific flex centering here as we'll use a wrapper div */
 }
 
 /* New: Wrapper for app title to allow centering */
@@ -96,12 +94,30 @@ header {
   text-align: center; /* Centers the h1 inside */
 }
 
+/* General header h1 styling (for index.html) */
 header h1 {
   font-family: 'Poppins', sans-serif;
   font-weight: 700; /* Bolder for UniLife */
   color: var(--text);
   margin: 0;
-  animation: pulse 2s infinite alternate; /* Apply animation */
+  /* Animation only applies to portal page for now, general h1 won't pulse */
+}
+
+/* Specific styling for the portal page header to ensure title is truly central */
+body.portal-page header {
+  justify-content: center; /* Center the main content (title container) */
+  position: relative; /* Needed for absolute positioning of theme controls */
+}
+
+body.portal-page .app-title-container {
+  flex-grow: 1; /* Take all available space */
+  text-align: center; /* Center h1 within this space */
+}
+
+/* Increase font size for UniLife on portal page and apply pulse animation */
+body.portal-page header h1 {
+  font-size: 3rem; /* Larger on desktop */
+  animation: pulse 2s infinite alternate; /* Apply animation here */
 }
 
 /* Keyframe animation for pulse effect */
@@ -120,7 +136,17 @@ header h1 {
   }
 }
 
-/* Theme controls container */
+/* Position theme controls absolutely on portal page to not affect centering */
+body.portal-page .theme-controls {
+  position: absolute;
+  right: 1.5rem; /* Adjust to match container padding or desired distance from edge */
+  top: 50%; /* Center vertically */
+  transform: translateY(-50%); /* Adjust for vertical centering */
+  z-index: 2; /* Ensure it's above other elements if needed */
+}
+
+
+/* Theme controls container (General styling, adjusted for portal-page override) */
 .theme-controls {
   display: flex;
   gap: 0.5rem;
